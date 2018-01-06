@@ -74,6 +74,13 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 
 
         mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
+        if (!mCursor.moveToFirst()){
+            ContentValues cv = new ContentValues();
+            cv.put(VideoSource.URL, "rtmp://live.hkstv.hk.lxdns.com/live/hks");
+            TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
+            mCursor.close();
+            mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
+        }
         mRecyclerView = mBinding.recycler;
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -222,12 +229,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(new Intent(PlaylistActivity.this, AboutActivity.class));
             }
         });
-        String url;
-        if (PlaylistActivity.isPro()) {
-            url = "http://www.easydarwin.org/versions/easyplayer_pro/version.txt";
-        } else {
-            url = "http://www.easydarwin.org/versions/easyplayer/version.txt";
-        }
+        String url = "http://www.easydarwin.org/versions/easyplayer_rtmp/version.txt";
         update = new UpdateMgr(this);
         update.checkUpdate(url);
     }
@@ -318,7 +320,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //                            "name" : "9",
 //                            "url" : "rtsp://121.40.50.44:554/9.sdp"
 
-                        for (int i = 0; i < array.length(); i++) {
+                        for (int i = 0; i < array.length() && false; i++) {
                             JSONObject item = array.getJSONObject(i);
                             ContentValues cv = new ContentValues();
                             cv.put(VideoSource.INDEX, item.optInt("index"));

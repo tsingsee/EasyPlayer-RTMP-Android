@@ -11,7 +11,7 @@ public class EasyDBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "easydb.db";
     public EasyDBHelper(Context context) {
-        super(context, DB_NAME, null, 1);
+        super(context, DB_NAME, null, 2);
     }
 
     @Override
@@ -21,6 +21,7 @@ public class EasyDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+        sqLiteDatabase.execSQL("drop table if exists video_source");
+        VideoSource.createTable(sqLiteDatabase);
     }
 }
