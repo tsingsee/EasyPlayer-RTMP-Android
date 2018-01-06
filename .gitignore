@@ -5,3 +5,5 @@ build
 local.properties
 gradle.properties
 EasyPlayer/basic/
+*.apk
+EasyPlayer/release/
