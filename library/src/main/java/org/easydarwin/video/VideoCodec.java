@@ -24,6 +24,7 @@ public class VideoCodec {
 
     private native int decode(long handle, byte[] in, int offset, int length,int []size);
     private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int []size);
+    private native void releaseYUV(ByteBuffer buffer);
 
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
@@ -41,6 +42,11 @@ public class VideoCodec {
     public ByteBuffer decoder_decodeYUV(byte[] in, int offset, int length, int[]size) {
         ByteBuffer  buffer = decodeYUV(mHandle, in, offset, length, size);
         return buffer;
+    }
+
+
+    public void decoder_releaseBuffer(ByteBuffer buffer) {
+        releaseYUV(buffer);
     }
 
 
@@ -80,5 +86,10 @@ public class VideoCodec {
         protected ByteBuffer decodeFrameYUV(Client.FrameInfo aFrame, int []size) {
             return decoder_decodeYUV( aFrame.buffer, aFrame.offset, aFrame.length, size);
         }
+
+        protected void releaseBuffer(ByteBuffer buffer){
+            decoder_releaseBuffer(buffer);
+        }
+
     }
 }

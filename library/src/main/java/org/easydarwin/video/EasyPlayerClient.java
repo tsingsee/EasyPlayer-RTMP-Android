@@ -804,6 +804,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 //                                mDecoder.decodeFrame(frameInfo, size);
                                 ByteBuffer buf = mDecoder.decodeFrameYUV(frameInfo, size);
                                 if (i420callback != null && buf != null) i420callback.onI420Data(buf);
+                                if (buf != null) mDecoder.releaseBuffer(buf);
                                 long decodeSpend = System.currentTimeMillis() - decodeBegin;
 
                                 boolean firstFrame = previewStampUs == 0l;
