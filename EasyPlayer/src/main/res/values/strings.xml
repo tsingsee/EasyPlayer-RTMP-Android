@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EasyPlayer-RTMP</string>
+    <string name="app_name">EasyPlayer</string>
     <string name="app_flavor">basic</string>
 
     <string name="title_activity_settings">Settings</string>
