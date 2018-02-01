@@ -1,6 +1,6 @@
 # EasyPlayer-RTMP #
 
-EasyPlayer **RTMP Android** 播放器是由[紫鲸团队](http://www.pvale.com "紫鲸云")开发和维护的一个完善的RTMP流媒体播放器项目，视频编码支持**H.264**，音频支持**AAC**，支持RTSP over TCP/UDP协议，支持**硬解码**，**软解码**，是一套极佳的安防流媒体平台播放组件！EasyPlayer-RTMP Android 安卓版本经过了很多年的发展和迭代，已经非常稳定、完整，功能包括：直播、录像、抓图，支持指令集包括armv7a、armv8a、x86，应该说是目前市面上功能性、稳定性和完整性最强的一款RTMP播放器！
+EasyPlayer-**RTMP** Android 播放器是由[紫鲸团队](http://www.pvale.com "紫鲸云")开发和维护的一个完善的RTMP安卓流媒体播放器项目，视频编码支持**H.264**（可以扩展H.265），音频支持**AAC**，支持RTMP/FLV协议，支持**硬解码**，**软解码**，是一套极佳的安防流媒体平台播放组件！EasyPlayer-RTMP Android 安卓版本经过了很多年的发展和迭代，已经非常稳定、完整，功能包括：直播、录像、抓图，支持指令集包括armv7a、armv8a、x86，应该说是目前市面上功能性、稳定性和完整性最强的一款RTMP播放器，轻！稳定！可控！
 
 
 ## 工作流程 ##
@@ -12,7 +12,7 @@ EasyPlayer **RTMP Android** 播放器是由[紫鲸团队](http://www.pvale.com "
 
 - [x] 超低延迟的rtmp播放器；
 - [x] 完美支持多窗口多实例播放；
-- [x] 支持播放端，buffer设置；
+- [x] 支持播放端，Buffer设置；
 - [x] 秒开播放；
 - [x] 支持自定义播放布局;
 - [x] 编解码、显示、播放源码全开放，更加灵活;
@@ -21,7 +21,9 @@ EasyPlayer **RTMP Android** 播放器是由[紫鲸团队](http://www.pvale.com "
 - [x] [快照]支持播放过程中，**随时快照**；
 - [x] [录像]支持播放过程中，**随时录像**；
 
+
 ## 编译方法 ##
+
 Android：Android Studio编译；
 
 
@@ -44,7 +46,7 @@ Android：Android Studio编译；
 
 ## DEMO效果 ##
 
-![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/easyplayerrtmp/EasyPlayerRTMPAndroid.png)
+![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/easyplayerrtmp/EasyPlayerRTMPAndroid20180101.png)
 
 ## EasyPlayer项目集群说明 ##
 
