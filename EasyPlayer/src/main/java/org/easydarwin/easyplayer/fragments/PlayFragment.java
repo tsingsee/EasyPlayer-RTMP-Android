@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -143,7 +144,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         if (!mStreamRender.isRecording()) {
             File f = new File(TheApp.sMoviePath);
             f.mkdirs();
-            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".mp4").getPath());
+            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd-HH_mm_ss").format(new Date()) + ".mp4").getPath());
             return true;
         } else {
             mStreamRender.stopRecord();
@@ -444,7 +445,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     protected void startRending(SurfaceTexture surface) {
-        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver);
+        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver, new EasyPlayerClient.I420DataCallback() {
+            @Override
+            public void onI420Data(ByteBuffer buffer) {
+                // buffer里面就是yuv数据.
+                Log.i(TAG, "I420 data length :" + buffer.capacity());
+            }
+        });
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 

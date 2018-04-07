@@ -112,12 +112,14 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     private AudioTrack mAudioTrack;
     private String mRecordingPath;
     private EasyAACMuxer mObject;
+    private EasyMuxer2 muxer2;
     private Client.MediaInfo mMediaInfo;
     private short mHeight = 0;
     short mWidth = 0;
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
     private final I420DataCallback i420callback;
+    private boolean mMuxerWaitingKeyVideo;
 
 //    private RtmpClient mRTMPClient = new RtmpClient();
 
@@ -498,14 +500,17 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                             if (frameInfo == null) {
                                 frameInfo = mQueue.takeAudioFrame();
                             }
-                            if (frameInfo.codec == EASY_SDK_AUDIO_CODEC_AAC) {
+                            if (frameInfo.codec == EASY_SDK_AUDIO_CODEC_AAC && false)
+                            {
                                 pumpAACSample(frameInfo);
                             }
                             outLen[0] = mBufferReuse.length;
                             long ms = SystemClock.currentThreadTimeMillis();
                             int nRet = AudioCodec.decode(handle, frameInfo.buffer, 0, frameInfo.length, mBufferReuse, outLen);
                             if (nRet == 0) {
-                                if (frameInfo.codec != EASY_SDK_AUDIO_CODEC_AAC) {
+//                                if (frameInfo.codec != EASY_SDK_AUDIO_CODEC_AAC )
+                                {
+//                                    save2path(mBufferReuse, 0, outLen[0],"/sdcard/111.pcm", true);
                                     pumpPCMSample(mBufferReuse, outLen[0], frameInfo.stamp);
                                 }
                                 if (mAudioEnable)
@@ -795,6 +800,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         if (frameInfo != null) {
                             Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - previewStampUs1) + "]");
                             previewStampUs1 = frameInfo.stamp;
+
+
+                            pumpVideoSample(frameInfo);
                         }
 
                         if (mDecoder != null) {
@@ -824,7 +832,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     if (sleepTime > 0) {
                                         sleepTime %= 100000;
                                         long cache = mNewestStample - frameInfo.stamp;
-                                        sleepTime = fixSleepTime(sleepTime, cache, -100000);
+                                        sleepTime = fixSleepTime(sleepTime, cache, 100000);
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
@@ -837,7 +845,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                             do {
                                 if (frameInfo != null) {
                                     byte[] pBuf = frameInfo.buffer;
-                                    pumpVideoSample(frameInfo);
                                     index = mCodec.dequeueInputBuffer(10);
                                     if (index >= 0) {
                                         ByteBuffer buffer = mCodec.getInputBuffers()[index];
@@ -877,7 +884,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             }
                                             {
                                                 long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, -100000);
+                                                newSleepUs = fixSleepTime(sleepUs, cache, 0);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
                                                 Log.d(TAG,"cache:" + cache);
                                             }
@@ -932,8 +939,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         return (long) r;
     }
 
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public synchronized void startRecord(String path) {
+    public synchronized void startRecord1(String path) {
         if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
             return;
         mRecordingPath = path;
@@ -974,6 +982,32 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public synchronized void startRecord(String path) {
+        if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
+            return;
+        mRecordingPath = path;
+        EasyMuxer2 muxer2 = new EasyMuxer2();
+
+        byte [] extra = new byte[mCSD0.capacity() + mCSD1.capacity()];
+        mCSD0.clear();
+        mCSD1.clear();
+        mCSD0.get(extra, 0, mCSD0.capacity());
+        mCSD1.get(extra, mCSD0.capacity(), mCSD1.capacity());
+
+        int r = muxer2.create(path, mWidth, mHeight, extra, mMediaInfo.sample, mMediaInfo.channel);
+        if (r != 0){
+            Log.w(TAG,"create muxer2:" + r);
+            return;
+        }
+        mMuxerWaitingKeyVideo = true;
+        this.muxer2 = muxer2;
+        ResultReceiver rr = mRR;
+        if (rr != null) {
+            rr.send(RESULT_RECORD_BEGIN, null);
+        }
+    }
+
     private static int getSampleIndex(int sample) {
         for (int i = 0; i < AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE.length; i++) {
             if (sample == AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE[i]) {
@@ -1007,7 +1041,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         }
     }
 
-    private void pumpPCMSample(byte[] pcm, int length, long stampUS) {
+    private void pumpPCMSample1(byte[] pcm, int length, long stampUS) {
         EasyAACMuxer muxer = mObject;
         if (muxer == null) return;
         try {
@@ -1016,8 +1050,14 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             e.printStackTrace();
         }
     }
+    private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
+        EasyMuxer2 muxer2 = this.muxer2;
+        if (muxer2 == null) return;
+        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_AUDIO, pcm,0, length, stampUS/1000);
+        Log.i(TAG,"writeFrame audio ret:" + r);
+    }
 
-    private void pumpVideoSample(Client.FrameInfo frameInfo) {
+    private void pumpVideoSample1(Client.FrameInfo frameInfo) {
         EasyMuxer muxer = mObject;
         if (muxer == null) return;
         MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
@@ -1040,10 +1080,39 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         }
     }
 
-    public synchronized void stopRecord() {
+    private synchronized void pumpVideoSample(Client.FrameInfo frameInfo) {
+        EasyMuxer2 muxer2 = this.muxer2;
+        if (muxer2 == null) return;
+        if (mMuxerWaitingKeyVideo){
+            if (frameInfo.type == 1){
+                mMuxerWaitingKeyVideo = false;
+            }
+        }
+        if (mMuxerWaitingKeyVideo){
+            Log.i(TAG,"writeFrame ignore due to no key frame!");
+            return;
+        }
+        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_VIDEO, frameInfo.buffer,frameInfo.offset, frameInfo.length, frameInfo.stamp/1000);
+        Log.i(TAG,"writeFrame video ret:" + r);
+    }
+
+    public synchronized void stopRecord1() {
         mRecordingPath = null;
         if (mObject == null) return;
         mObject.release();
+        mObject = null;
+        ResultReceiver rr = mRR;
+        if (rr != null) {
+            rr.send(RESULT_RECORD_END, null);
+        }
+    }
+
+    public synchronized void stopRecord() {
+        mRecordingPath = null;
+        EasyMuxer2 muxer2 = this.muxer2;
+        if (muxer2 == null) return;
+        this.muxer2 = null;
+        muxer2.close();
         mObject = null;
         ResultReceiver rr = mRR;
         if (rr != null) {

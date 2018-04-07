@@ -85,14 +85,19 @@ public class Client implements Closeable {
 
         int videoCodec;
         int fps;
+        int videoQueueSize;
+
         int audioCodec;
         int sample;
         int channel;
         int bitPerSample;
-        int spsLen;
-        int ppsLen;
-        byte[] sps;
-        byte[] pps;
+        int audioQueueSize;
+
+        byte[]	 vps;
+        byte[]	 sps;
+        byte[]	 pps;
+        byte[]	 sei;
+
 
 
         @Override
@@ -104,8 +109,6 @@ public class Client implements Closeable {
                     ", sample=" + sample +
                     ", channel=" + channel +
                     ", bitPerSample=" + bitPerSample +
-                    ", spsLen=" + spsLen +
-                    ", ppsLen=" + ppsLen +
                     '}';
         }
     }
@@ -235,17 +238,52 @@ public class Client implements Closeable {
                 buffer.order(ByteOrder.LITTLE_ENDIAN);
                 mi.videoCodec = buffer.getInt();
                 mi.fps = buffer.getInt();
+                mi.videoQueueSize = buffer.getInt();
+
+
                 mi.audioCodec = buffer.getInt();
                 mi.sample = buffer.getInt();
                 mi.channel = buffer.getInt();
                 mi.bitPerSample = buffer.getInt();
-                mi.spsLen = buffer.getInt();
-                mi.ppsLen = buffer.getInt();
-                mi.sps = new byte[128];
-                mi.pps = new byte[36];
+                mi.audioQueueSize = buffer.getInt();
 
-                buffer.get(mi.sps);
-                buffer.get(mi.pps);
+
+                int u32VpsLength = buffer.getInt();
+                int u32SpsLength= buffer.getInt();
+                int u32PpsLength= buffer.getInt();
+                int u32SeiLength= buffer.getInt();
+                u32VpsLength = Math.max(0, u32VpsLength);
+                u32SpsLength = Math.max(0, u32SpsLength);
+                u32PpsLength = Math.max(0, u32PpsLength);
+                u32SeiLength = Math.max(0, u32SeiLength);
+
+
+                u32VpsLength = Math.min(u32VpsLength, 255);
+                u32SpsLength = Math.min(u32SpsLength, 255);
+                u32PpsLength = Math.min(u32PpsLength, 128);
+                u32SeiLength = Math.min(u32SeiLength, 128);
+
+                byte []tmp = new byte[255];
+                buffer.get(tmp);
+                mi.vps = new byte[u32VpsLength];
+                System.arraycopy(tmp, 0, mi.vps, 0, u32VpsLength);
+
+                buffer.get(tmp);
+                mi.sps = new byte[u32SpsLength];
+                System.arraycopy(tmp, 0, mi.sps, 0, u32SpsLength);
+
+                tmp = new byte[128];
+
+                buffer.get(tmp);
+                mi.pps = new byte[u32PpsLength];
+                System.arraycopy(tmp, 0, mi.pps, 0, u32PpsLength);
+
+
+                buffer.get(tmp);
+                mi.sei = new byte[u32SeiLength];
+                System.arraycopy(tmp, 0, mi.sei, 0, u32SeiLength);
+
+
 //                    int videoCodec;int fps;
 //                    int audioCodec;int sample;int channel;int bitPerSample;
 //                    int spsLen;
