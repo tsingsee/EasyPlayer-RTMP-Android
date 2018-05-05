@@ -9,8 +9,8 @@ android {
         applicationId "org.easydarwin.easyplayer.rtmp"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 33
-        versionName "1.1.18.0130"
+        versionCode 34
+        versionName "1.1.18.0505"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

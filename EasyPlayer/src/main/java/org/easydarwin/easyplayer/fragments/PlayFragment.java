@@ -251,7 +251,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 //                        stopRending();
 //                    }
                     if (activity instanceof PlayActivity) {
-                        ((PlayActivity)activity).onEvent(PlayFragment.this, errorcode, resultData.getString("event-msg"));
+                        String msg = resultData.getString("event-msg");
+                        if (!TextUtils.isEmpty(msg)) {
+                            ((PlayActivity) activity).onEvent(PlayFragment.this, errorcode, msg);
+                        }
                     }
                 }else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN){
                     if (activity instanceof PlayActivity)
@@ -445,13 +448,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     protected void startRending(SurfaceTexture surface) {
-        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver, new EasyPlayerClient.I420DataCallback() {
-            @Override
-            public void onI420Data(ByteBuffer buffer) {
-                // buffer里面就是yuv数据.
-                Log.i(TAG, "I420 data length :" + buffer.capacity());
-            }
-        });
+        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver);
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 
