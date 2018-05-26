@@ -458,22 +458,24 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             mCursor.moveToPosition(pos);
             String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
             if (!TextUtils.isEmpty(playUrl)) {
-                Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
-                i.putExtra("play_url", playUrl);
-                mPos = pos;
-                ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
-
+                if (BuildConfig.YUV_EXPORT) {
+                    // YUV EXPORT DEMO..
+                    Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
+                    i.putExtra("play_url", playUrl);
+                    mPos = pos;
+                    startActivity(i);
+                }else{
+                    Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
+                    i.putExtra("play_url", playUrl);
+                    mPos = pos;
+                    ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                }
 
 //                Intent i = new Intent(PlaylistActivity.this, TwoWndPlayActivity.class);
 //                i.putExtra("play_url", playUrl);
 //                mPos = pos;
 //                ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
 
-
-//                Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
-//                i.putExtra("play_url", playUrl);
-//                mPos = pos;
-//                startActivity(i);
             }
         }
     }

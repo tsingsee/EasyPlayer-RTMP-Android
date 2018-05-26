@@ -735,23 +735,26 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
                 MediaCodec mCodec = null;
-                VideoCodec.VideoDecoderLite mDecoder = null;
+                VideoCodec.VideoDecoderLite mDecoder = null, displayer = null;
                 try {
                     boolean pushBlankBuffersOnStop = true;
 
                     int index = 0;
-                    long previewStampUs = 0l;
-                    long previewTickUs = 0l;
+                    // previous
+                    long previousStampUs = 0l;
+                    long lastFrameStampUs = 0l;
                     long differ = 0;
+//
+//                    long decodeBegin = 0;
+//                    long current = 0;
 
-                    long previewStampUs1 = 0;
                     MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
                     while (mThread != null) {
                         Client.FrameInfo frameInfo;
                         if (mCodec == null && mDecoder == null) {
                             frameInfo = mQueue.takeVideoFrame();
                             try {
-                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false) || i420callback != null){
+                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false) ){
                                     throw new IllegalStateException("user set sw codec");
                                 }
                                 final String mime = frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264 ? "video/avc" : "video/hevc";
@@ -771,10 +774,13 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                 }
                                 MediaCodec codec = MediaCodec.createDecoderByType(mime);
                                 Log.i(TAG, String.format("config codec:%s", format));
-                                codec.configure(format, mSurface, null, 0);
+                                codec.configure(format, null, null, 0);
                                 codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                                 codec.start();
                                 mCodec = codec;
+                                final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
+                                decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
+                                displayer = decoder;
                             } catch (Throwable e) {
                                 Log.e(TAG, String.format("init codec error due to %s", e.getMessage()));
                                 e.printStackTrace();
@@ -798,48 +804,47 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                             frameInfo = mQueue.takeVideoFrame(5);
                         }
                         if (frameInfo != null) {
-                            Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - previewStampUs1) + "]");
-                            previewStampUs1 = frameInfo.stamp;
-
-
+                            Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - lastFrameStampUs) + "]");
                             pumpVideoSample(frameInfo);
+                            lastFrameStampUs = frameInfo.stamp;
                         }
 
                         if (mDecoder != null) {
                             if (frameInfo != null) {
-                                long decodeBegin = System.currentTimeMillis();
+                                long decodeBegin = SystemClock.elapsedRealtime();
                                 int[] size = new int[2];
 //                                mDecoder.decodeFrame(frameInfo, size);
                                 ByteBuffer buf = mDecoder.decodeFrameYUV(frameInfo, size);
                                 if (i420callback != null && buf != null) i420callback.onI420Data(buf);
                                 if (buf != null) mDecoder.releaseBuffer(buf);
-                                long decodeSpend = System.currentTimeMillis() - decodeBegin;
+                                long decodeSpend = SystemClock.elapsedRealtime() - decodeBegin;
 
-                                boolean firstFrame = previewStampUs == 0l;
+                                boolean firstFrame = previousStampUs == 0l;
                                 if (firstFrame) {
                                     Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
                                     ResultReceiver rr = mRR;
                                     if (rr != null) rr.send(RESULT_VIDEO_DISPLAYED, null);
                                 }
-                                long current = frameInfo.stamp;
 
-                                if (previewStampUs != 0l) {
-                                    long sleepTime = current - previewStampUs - decodeSpend * 1000;
-                                    if (sleepTime>50000){
+                                //Log.d(TAG, String.format("timestamp=%d diff=%d",current, current - previousStampUs ));
+
+                                if (previousStampUs != 0l) {
+                                    long sleepTime = frameInfo.stamp - previousStampUs - decodeSpend * 1000;
+                                    if (sleepTime > 100000){
                                         Log.w(TAG,"sleep time.too long:" + sleepTime);
-                                        sleepTime = 50000;
+                                        sleepTime = 100000;
                                     }
                                     if (sleepTime > 0) {
                                         sleepTime %= 100000;
                                         long cache = mNewestStample - frameInfo.stamp;
-                                        sleepTime = fixSleepTime(sleepTime, cache, 100000);
+                                        sleepTime = fixSleepTime(sleepTime, cache, 50000);
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
                                         Log.d(TAG,"cache:" + cache);
                                     }
                                 }
-                                previewStampUs = current;
+                                previousStampUs = frameInfo.stamp;
                             }
                         } else {
                             do {
@@ -858,6 +863,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                         frameInfo = null;
                                     }
                                 }
+
                                 index = mCodec.dequeueOutputBuffer(info, 10); //
                                 switch (index) {
                                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -874,39 +880,53 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                         // 输出队列不为空
                                         // -1表示为第一帧数据
                                         long newSleepUs = -1;
-                                        boolean firstTime = previewStampUs == 0l;
+                                        boolean firstTime = previousStampUs == 0l;
                                         if (!firstTime) {
-                                            long sleepUs = (info.presentationTimeUs - previewStampUs);
-                                            if (sleepUs > 50000) {
+                                            long sleepUs = (info.presentationTimeUs - previousStampUs);
+                                            if (sleepUs > 100000) {
                                                 // 时间戳异常，可能服务器丢帧了。
                                                 Log.w(TAG,"sleep time.too long:" + sleepUs);
-                                                sleepUs = 50000;
+                                                sleepUs = 100000;
                                             }
+                                            else if(sleepUs < 0) {
+                                                Log.w(TAG,"sleep time.too short:" + sleepUs);
+                                                sleepUs = 0;
+                                            }
+
                                             {
-                                                long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, 0);
+                                                long cache = mNewestStample - lastFrameStampUs;
+                                                newSleepUs = fixSleepTime(sleepUs, cache, 100000);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
-                                                Log.d(TAG,"cache:" + cache);
                                             }
                                         }
-                                        previewStampUs = info.presentationTimeUs;
 
+                                        //previousStampUs = info.presentationTimeUs;
+                                        ByteBuffer outputBuffer;
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                            outputBuffer = mCodec.getOutputBuffer(index);
+                                        }else{
+                                            outputBuffer = mCodec.getOutputBuffers()[index];
+                                        }
+                                        if (i420callback != null && outputBuffer != null) i420callback.onI420Data(outputBuffer);
+                                        displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
+                                        //previewStampUs = info.presentationTimeUs;
                                         if (false && Build.VERSION.SDK_INT >= 21) {
-                                            Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previewStampUs));
-                                            mCodec.releaseOutputBuffer(index, previewStampUs);
+                                            Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previousStampUs));
+                                            mCodec.releaseOutputBuffer(index, previousStampUs);
                                         } else {
                                             if (newSleepUs < 0) {
                                                 newSleepUs = 0;
                                             }
-//                                            Log.i(TAG,String.format("sleep:%d", newSleepUs/1000));
+//                                            Log.d(TAG,String.format("sleep:%d", newSleepUs/1000));
                                             Thread.sleep(newSleepUs / 1000);
-                                            mCodec.releaseOutputBuffer(index, true);
+                                            mCodec.releaseOutputBuffer(index, false);
                                         }
                                         if (firstTime) {
                                             Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
                                             ResultReceiver rr = mRR;
                                             if (rr != null) rr.send(RESULT_VIDEO_DISPLAYED, null);
                                         }
+                                        previousStampUs = info.presentationTimeUs;
                                 }
                             } while (frameInfo != null || index < MediaCodec.INFO_TRY_AGAIN_LATER);
                         }
@@ -921,6 +941,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     if (mDecoder != null) {
                         mDecoder.close();
                     }
+                    if (displayer != null) {
+                        displayer.close();
+                    }
                 }
             }
         };
@@ -933,12 +956,11 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             totalTimestampDifferUs = 0;
         }
         double dValue = ((double) (delayUs - totalTimestampDifferUs)) / 1000000d;
-        double radio = Math.pow(30,dValue);
-        final double r = sleepTimeUs * radio + 0.5f;
-//        Log.d(TAG,String.format("fixSleepTime %d,%d,%d->%d", sleepTimeUs, totalTimestampDifferUs, delayUs, (long) r));
+        double radio = Math.exp(dValue);
+        double r = sleepTimeUs * radio + 0.5f;
+        Log.i(TAG,String.format("%d,%d,%d->%d", sleepTimeUs, totalTimestampDifferUs, delayUs, (int)r));
         return (long) r;
     }
-
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public synchronized void startRecord1(String path) {
@@ -1050,6 +1072,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             e.printStackTrace();
         }
     }
+
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
         EasyMuxer2 muxer2 = this.muxer2;
         if (muxer2 == null) return;
@@ -1123,13 +1146,13 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onSourceCallBack(int _channelId, int _channelPtr, int _frameType, Client.FrameInfo frameInfo) {
-        long begin = SystemClock.elapsedRealtime();
+//        long begin = SystemClock.elapsedRealtime();
         try{
             onRTSPSourceCallBack1(_channelId, _channelPtr, _frameType, frameInfo);
         }catch (Throwable e){
             e.printStackTrace();
         }finally {
-            Log.d(TAG, String.format("onRTSPSourceCallBack %d", SystemClock.elapsedRealtime() - begin));
+//            Log.d(TAG, String.format("onRTSPSourceCallBack %d", SystemClock.elapsedRealtime() - begin));
         }
     }
 
@@ -1139,6 +1162,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             mReceivedDataLength += frameInfo.length;
         }
         if (_frameType == Client.EASY_SDK_VIDEO_FRAME_FLAG) {
+            //Log.d(TAG,String.format("receive video frame"));
             if (frameInfo.codec != EASY_SDK_VIDEO_CODEC_H264 && frameInfo.codec != EASY_SDK_VIDEO_CODEC_H265) {
                 ResultReceiver rr = mRR;
                 if (!mNotSupportedVideoCB && rr != null) {

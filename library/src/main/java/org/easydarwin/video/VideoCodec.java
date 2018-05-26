@@ -26,6 +26,8 @@ public class VideoCodec {
     private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int []size);
     private native void releaseYUV(ByteBuffer buffer);
 
+    private native void decodeYUV2(long handle,ByteBuffer buffer, int width, int height);
+
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
         if (mHandle != 0) {
@@ -47,6 +49,10 @@ public class VideoCodec {
 
     public void decoder_releaseBuffer(ByteBuffer buffer) {
         releaseYUV(buffer);
+    }
+
+    public void decoder_decodeBuffer(ByteBuffer buffer, int width, int height) {
+        decodeYUV2(mHandle, buffer, width, height);
     }
 
 
