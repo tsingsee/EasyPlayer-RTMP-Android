@@ -85,18 +85,16 @@ public class Client implements Closeable {
 
         int videoCodec;
         int fps;
-        int videoQueueSize;
 
         int audioCodec;
         int sample;
         int channel;
         int bitPerSample;
-        int audioQueueSize;
+        int spsLen;
 
-        byte[]	 vps;
+        int ppsLen;
         byte[]	 sps;
         byte[]	 pps;
-        byte[]	 sei;
 
 
 
@@ -109,6 +107,8 @@ public class Client implements Closeable {
                     ", sample=" + sample +
                     ", channel=" + channel +
                     ", bitPerSample=" + bitPerSample +
+                    ", spsLen=" + spsLen +
+                    ", ppsLen=" + ppsLen +
                     '}';
         }
     }
@@ -207,10 +207,10 @@ public class Client implements Closeable {
             throw new IllegalStateException("context is 0!");
         }
 
-        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0);
+        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, 0);
     }
 
-    private native int openStream(long context, int channel, String url, int type, int mediaType, String user, String pwd, int reconn, int outRtpPacket);
+    private native int openStream(long context, int channel, String url, int type, int mediaType, String user, String pwd, int reconn, int outRtpPacket, int rtspOption);
 
 //    private native int startRecord(int context, String path);
 //
@@ -249,10 +249,10 @@ public class Client implements Closeable {
 
 
 //                int u32VpsLength = buffer.getInt();
-//                int u32SpsLength= buffer.getInt();
-//                int u32PpsLength= buffer.getInt();
-//                int u32SeiLength= buffer.getInt();
-//                u32VpsLength = Math.max(0, u32VpsLength);
+                mi.spsLen = buffer.getInt();
+                mi.ppsLen = buffer.getInt();
+                mi.sps = new byte[128];
+                mi.pps = new byte[36];
 //                u32SpsLength = Math.max(0, u32SpsLength);
 //                u32PpsLength = Math.max(0, u32PpsLength);
 //                u32SeiLength = Math.max(0, u32SeiLength);
@@ -264,11 +264,11 @@ public class Client implements Closeable {
 //                u32SeiLength = Math.min(u32SeiLength, 128);
 //
 //                byte []tmp = new byte[255];
-//                buffer.get(tmp);
+                buffer.get(mi.sps);
 //                mi.vps = new byte[u32VpsLength];
 //                System.arraycopy(tmp, 0, mi.vps, 0, u32VpsLength);
 //
-//                buffer.get(tmp);
+                buffer.get(mi.pps);
 //                mi.sps = new byte[u32SpsLength];
 //                System.arraycopy(tmp, 0, mi.sps, 0, u32SpsLength);
 //
