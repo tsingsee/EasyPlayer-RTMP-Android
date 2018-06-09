@@ -774,13 +774,15 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                 }
                                 MediaCodec codec = MediaCodec.createDecoderByType(mime);
                                 Log.i(TAG, String.format("config codec:%s", format));
-                                codec.configure(format, null, null, 0);
+                                codec.configure(format, i420callback != null ? null : mSurface, null, 0);
                                 codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                                 codec.start();
                                 mCodec = codec;
-                                final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
-                                decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
-                                displayer = decoder;
+                                if (i420callback != null) {
+                                    final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
+                                    decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
+                                    displayer = decoder;
+                                }
                             } catch (Throwable e) {
                                 Log.e(TAG, String.format("init codec error due to %s", e.getMessage()));
                                 e.printStackTrace();
@@ -907,8 +909,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                         }else{
                                             outputBuffer = mCodec.getOutputBuffers()[index];
                                         }
-                                        if (i420callback != null && outputBuffer != null) i420callback.onI420Data(outputBuffer);
-                                        displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
+                                        if (i420callback != null && outputBuffer != null) {
+                                            i420callback.onI420Data(outputBuffer);
+                                            displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
+                                        }
                                         //previewStampUs = info.presentationTimeUs;
                                         if (false && Build.VERSION.SDK_INT >= 21) {
                                             Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previousStampUs));
@@ -919,7 +923,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             }
 //                                            Log.d(TAG,String.format("sleep:%d", newSleepUs/1000));
                                             Thread.sleep(newSleepUs / 1000);
-                                            mCodec.releaseOutputBuffer(index, false);
+                                            mCodec.releaseOutputBuffer(index, i420callback == null);
                                         }
                                         if (firstTime) {
                                             Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
