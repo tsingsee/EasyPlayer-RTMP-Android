@@ -771,10 +771,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         final Thread t = Thread.currentThread();
 
                         if (mAudioTrack == null) {
-                            int sampleRateInHz = (int) (mMediaInfo.sample * 1.004);
+                            int sampleRateInHz = (int) (mMediaInfo.sample * 1.001);
                             int channelConfig = mMediaInfo.channel == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
                             int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-                            int bfSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat) * 4;
+                            int bfSize = AudioTrack.getMinBufferSize(mMediaInfo.sample, channelConfig, audioFormat) * 8;
                             mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateInHz, channelConfig, audioFormat, bfSize, AudioTrack.MODE_STREAM);
                         }
                         mAudioTrack.play();
