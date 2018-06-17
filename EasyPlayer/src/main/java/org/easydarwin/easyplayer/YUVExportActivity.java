@@ -12,7 +12,6 @@ import android.widget.Toast;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.easyplayer.fragments.YUVExportFragment;
 import org.easydarwin.video.Client;
-import org.esaydarwin.rtsp.player.R;
 
 public class YUVExportActivity extends AppCompatActivity {
 

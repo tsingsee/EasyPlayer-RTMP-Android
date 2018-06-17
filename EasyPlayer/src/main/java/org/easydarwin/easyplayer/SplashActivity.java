@@ -10,8 +10,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import org.esaydarwin.rtsp.player.R;
-
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.

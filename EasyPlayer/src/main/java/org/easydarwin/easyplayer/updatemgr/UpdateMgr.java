@@ -7,19 +7,18 @@ import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.easydarwin.easyplayer.PlaylistActivity;
-import org.esaydarwin.rtsp.player.R;
-
-import java.io.IOException;
-import android.os.Handler;
-
 import com.google.gson.Gson;
 
-import okhttp3.OkHttpClient;
+import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.R;
 
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 

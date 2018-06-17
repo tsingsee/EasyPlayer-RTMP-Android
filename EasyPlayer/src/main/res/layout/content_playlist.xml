@@ -30,6 +30,15 @@
                 android:layout_height="wrap_content" />
             <ImageButton
                 android:layout_width="wrap_content"
+                android:id="@+id/toolbar_multiplay"
+                style="@style/Base.Widget.AppCompat.ActionButton"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:onClick="onMultiplay"
+                android:src="@drawable/ic_action_multiplay" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
                 android:src="@drawable/ic_action_add"
                 android:id="@+id/toolbar_add"
                 style="@style/Base.Widget.AppCompat.ActionButton"

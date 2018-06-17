@@ -3,50 +3,37 @@ package org.easydarwin.easyplayer;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityMediaFilesBinding;
-import org.esaydarwin.rtsp.player.databinding.FragmentMediaFileBinding;
-import org.esaydarwin.rtsp.player.databinding.ImagePickerItemBinding;
+import org.easydarwin.easyplayer.databinding.ActivityMediaFilesBinding;
+import org.easydarwin.easyplayer.databinding.FragmentMediaFileBinding;
+import org.easydarwin.easyplayer.databinding.ImagePickerItemBinding;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MediaFilesActivity extends AppCompatActivity {
 

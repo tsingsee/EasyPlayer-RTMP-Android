@@ -14,13 +14,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.OverlayCanvasView;
 import org.easydarwin.video.Client;
 import org.easydarwin.video.EasyPlayerClient;
-import org.esaydarwin.rtsp.player.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,12 +72,30 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         sendResult(RESULT_REND_STARTED, null);
     }
 
+    /**
+     * 这个buffer对象在回调结束之后会变无效.所以不可以把它保存下来用
+     * .如果需要保存,必须要创建新buffer,并拷贝数据.
+     *
+     * @param buffer
+     */
     @Override
     public void onI420Data(ByteBuffer buffer) {
         Log.i(TAG, "I420 data length :" + buffer.capacity());
+        // save to local...
+//        writeToFile("/sdcard/tmp.yuv", buffer);
+    }
 
-
-
+    private void writeToFile(String path, ByteBuffer buffer) {
+        try {
+            FileOutputStream fos = new FileOutputStream(path, true);
+            byte[] in = new byte[buffer.capacity()];
+            buffer.clear();
+            buffer.get(in);
+            fos.write(in);
+            fos.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override

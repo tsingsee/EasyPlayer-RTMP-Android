@@ -9,7 +9,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
-import org.esaydarwin.rtsp.player.R;
+import org.easydarwin.easyplayer.R;
 
 
 /**

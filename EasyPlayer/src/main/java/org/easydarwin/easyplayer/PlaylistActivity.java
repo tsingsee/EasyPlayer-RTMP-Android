@@ -34,11 +34,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.data.VideoSource;
+import org.easydarwin.easyplayer.databinding.ContentPlaylistBinding;
+import org.easydarwin.easyplayer.databinding.VideoSourceItemBinding;
 import org.easydarwin.update.UpdateMgr;
-import org.esaydarwin.rtsp.player.BuildConfig;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ContentPlaylistBinding;
-import org.esaydarwin.rtsp.player.databinding.VideoSourceItemBinding;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +62,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
     private ContentPlaylistBinding mBinding;
     private Cursor mCursor;
     private UpdateMgr update;
+    public static final String EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY = "extra-boolean-select-item-to-play";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +119,9 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         });
 
         if (savedInstanceState == null) {
-            startActivity(new Intent(this, SplashActivity.class));
+            if (!getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)) {
+                startActivity(new Intent(this, SplashActivity.class));
+            }
         }
 
 
@@ -148,7 +149,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(View v) {
                 final EditText edit = new EditText(PlaylistActivity.this);
-                edit.setHint(isPro() ? "RTSP/RTMP/HTTP/HLS地址" : "RTMP地址(格式为RTMP://...)");
+                edit.setHint(isPro() ? "RTSP/RTMP/HTTP/HLS地址" : "RTSP地址(格式为RTSP://...)");
                 final int hori = (int) getResources().getDimension(R.dimen.activity_horizontal_margin);
                 final int verti = (int) getResources().getDimension(R.dimen.activity_vertical_margin);
                 edit.setPadding(hori, verti, hori, verti);
@@ -229,7 +230,12 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(new Intent(PlaylistActivity.this, AboutActivity.class));
             }
         });
-        String url = "http://www.easydarwin.org/versions/easyplayer_rtmp/version.txt";
+        String url;
+        if (PlaylistActivity.isPro()) {
+            url = "http://www.easydarwin.org/versions/easyplayer_pro/version.txt";
+        } else {
+            url = "http://www.easydarwin.org/versions/easyplayer/version.txt";
+        }
         update = new UpdateMgr(this);
         update.checkUpdate(url);
     }
@@ -320,7 +326,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //                            "name" : "9",
 //                            "url" : "rtsp://121.40.50.44:554/9.sdp"
 
-                        for (int i = 0; i < array.length() && false; i++) {
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject item = array.getJSONObject(i);
                             ContentValues cv = new ContentValues();
                             cv.put(VideoSource.INDEX, item.optInt("index"));
@@ -431,6 +437,11 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    public void onMultiplay(View view) {
+        Intent intent = new Intent(this, MultiplayActivity.class);
+        startActivity(intent);
+    }
+
     class PlayListViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView mTextView;
@@ -458,17 +469,24 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             mCursor.moveToPosition(pos);
             String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
             if (!TextUtils.isEmpty(playUrl)) {
-                if (BuildConfig.YUV_EXPORT) {
-                    // YUV EXPORT DEMO..
-                    Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
-                    i.putExtra("play_url", playUrl);
-                    mPos = pos;
-                    startActivity(i);
-                }else{
-                    Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
-                    i.putExtra("play_url", playUrl);
-                    mPos = pos;
-                    ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                if (getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)) {
+                    Intent data = new Intent();
+                    data.putExtra("url", playUrl);
+                    setResult(RESULT_OK, data);
+                    finish();
+                } else {
+                    if (BuildConfig.YUV_EXPORT) {
+                        // YUV EXPORT DEMO..
+                        Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
+                        i.putExtra("play_url", playUrl);
+                        mPos = pos;
+                        startActivity(i);
+                    } else {
+                        Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
+                        i.putExtra("play_url", playUrl);
+                        mPos = pos;
+                        ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                    }
                 }
 
 //                Intent i = new Intent(PlaylistActivity.this, TwoWndPlayActivity.class);

@@ -14,7 +14,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import org.easydarwin.easyplayer.fragments.PlayFragment;
-import org.esaydarwin.rtsp.player.R;
 
 
 /**

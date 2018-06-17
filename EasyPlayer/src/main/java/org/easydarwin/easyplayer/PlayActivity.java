@@ -37,12 +37,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-
+import org.easydarwin.easyplayer.databinding.ActivityMainBinding;
 import org.easydarwin.easyplayer.fragments.ImageFragment;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.video.Client;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityMainBinding;
 import org.json.JSONArray;
 import org.json.JSONException;
 

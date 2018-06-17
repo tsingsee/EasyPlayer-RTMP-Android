@@ -12,10 +12,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import org.easydarwin.easyplayer.databinding.ActivityTwoWndPlayBinding;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.video.Client;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityTwoWndPlayBinding;
 
 public class TwoWndPlayActivity extends AppCompatActivity {
 

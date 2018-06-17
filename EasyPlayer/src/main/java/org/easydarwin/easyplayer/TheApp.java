@@ -8,9 +8,6 @@ import android.preference.PreferenceManager;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.easydarwin.easyplayer.data.EasyDBHelper;
-import org.esaydarwin.rtsp.player.BuildConfig;
-import org.esaydarwin.rtsp.player.R;
-
 /**
  * Created by afd on 8/13/16.
  */

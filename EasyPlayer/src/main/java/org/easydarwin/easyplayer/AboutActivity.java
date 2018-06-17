@@ -13,9 +13,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
-import org.esaydarwin.rtsp.player.BuildConfig;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityAboutBinding;
+import org.easydarwin.easyplayer.databinding.*;
 
 public class AboutActivity extends AppCompatActivity {
 

@@ -14,10 +14,14 @@ public class EasyMuxer2 {
     }
     public static final int AVMEDIA_TYPE_VIDEO  = 0;
     public static final int AVMEDIA_TYPE_AUDIO  = 1;
+
+
+    public static final int VIDEO_TYPE_H264 = 0;
+    public static final int VIDEO_TYPE_H265 = 1;
     @Native
     private long ctx;
 
-    public native int create(String path, int width, int height, byte []extra, int sample, int channel);
+    public native int create(String path, int videoType, int width, int height, byte[] extra, int sample, int channel);
 
     public native int writeFrame(int streamType, byte[] frame, int offset, int length, long timeStampMillis);
 

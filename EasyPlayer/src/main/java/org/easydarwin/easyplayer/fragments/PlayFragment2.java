@@ -20,8 +20,8 @@ import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.R;
 import org.easydarwin.video.EasyPlayerClient;
-import org.esaydarwin.rtsp.player.R;
 
 import java.util.UUID;
 

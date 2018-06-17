@@ -9,14 +9,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.target.ImageViewTarget;
 
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.FragmentImageBinding;
+import org.easydarwin.easyplayer.R;
+import org.easydarwin.easyplayer.databinding.FragmentImageBinding;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 

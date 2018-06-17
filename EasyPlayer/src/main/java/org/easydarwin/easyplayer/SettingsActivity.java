@@ -1,8 +1,6 @@
 package org.easydarwin.easyplayer;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -12,8 +10,8 @@ import android.support.v7.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivitySettingBinding;
+import org.easydarwin.easyplayer.databinding.ActivitySettingBinding;
+
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On

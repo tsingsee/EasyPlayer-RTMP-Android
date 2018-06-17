@@ -1,12 +1,17 @@
 package org.easydarwin.video;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -19,6 +24,7 @@ import java.util.Set;
 public class Client implements Closeable {
 
     private static int sKey;
+    private static Context mContext;
     private volatile int paused = 0;
     private static final Handler h = new Handler(Looper.getMainLooper());
     private static Set<Integer> _channelPause = new HashSet<>();
@@ -69,47 +75,17 @@ public class Client implements Closeable {
         public boolean audio;
     }
 
-    public static final class MediaInfo {
-//        Easy_U32 u32VideoCodec;				/*  ”∆µ±‡¬Î¿‡–Õ */
-//        Easy_U32 u32VideoFps;				/*  ”∆µ÷°¬  */
-//
-//        Easy_U32 u32AudioCodec;				/* “Ù∆µ±‡¬Î¿‡–Õ */
-//        Easy_U32 u32AudioSamplerate;		/* “Ù∆µ≤…—˘¬  */
-//        Easy_U32 u32AudioChannel;			/* “Ù∆µÕ®µ¿ ˝ */
-//        Easy_U32 u32AudioBitsPerSample;		/* “Ù∆µ≤…—˘æ´∂» */
-//
-//        Easy_U32 u32H264SpsLength;			/*  ”∆µsps÷°≥§∂» */
-//        Easy_U32 u32H264PpsLength;			/*  ”∆µpps÷°≥§∂» */
-//        Easy_U8	 u8H264Sps[128];			/*  ”∆µsps÷°ƒ⁄»› */
-//        Easy_U8	 u8H264Pps[36];				/*  ”∆µsps÷°ƒ⁄»› */
-
-        int videoCodec;
-        int fps;
-
-        int audioCodec;
-        int sample;
-        int channel;
-        int bitPerSample;
-        int spsLen;
-
-        int ppsLen;
-        byte[]	 sps;
-        byte[]	 pps;
-
-
-
-        @Override
-        public String toString() {
-            return "MediaInfo{" +
-                    "videoCodec=" + videoCodec +
-                    ", fps=" + fps +
-                    ", audioCodec=" + audioCodec +
-                    ", sample=" + sample +
-                    ", channel=" + channel +
-                    ", bitPerSample=" + bitPerSample +
-                    ", spsLen=" + spsLen +
-                    ", ppsLen=" + ppsLen +
-                    '}';
+    Client(Context context, String key) {
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        if (context == null) {
+            throw new NullPointerException();
+        }
+        mCtx = init(context, key);
+        mContext = context.getApplicationContext();
+        if (mCtx == 0 || mCtx == -1) {
+            throw new IllegalArgumentException("初始化失败，KEY不合法！");
         }
     }
 
@@ -143,16 +119,23 @@ public class Client implements Closeable {
     private long mCtx;
     private static final SparseArray<SourceCallBack> sCallbacks = new SparseArray<>();
 
-    Client(Context context, String key) {
-        if (key == null) {
-            throw new NullPointerException();
-        }
-        if (context == null) {
-            throw new NullPointerException();
-        }
-        mCtx = init(context, key);
-        if (mCtx == 0 || mCtx == -1) {
-            throw new IllegalArgumentException("初始化失败，KEY不合法！");
+    private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(path, append);
+            fos.write(buffer, offset, length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -219,6 +202,27 @@ public class Client implements Closeable {
     private native void closeStream(long context);
 
     private static void onSourceCallBack(int _channelId, int _channelPtr, int _frameType, byte[] pBuf, byte[] frameBuffer) {
+        if (BuildConfig.MEDIA_DEBUG) {
+
+            int permissionCheck = ContextCompat.checkSelfPermission(mContext,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                // frameType + size + buffer
+                if (_frameType != 0) {
+                    ByteBuffer bf = ByteBuffer.allocate(5);
+                    bf.put((byte) _frameType);
+                    if (_frameType == EASY_SDK_MEDIA_INFO_FLAG) {
+                        bf.putInt(pBuf.length);
+                        save2path(bf.array(), 0, 5, "/sdcard/media_degbu.data", true);
+                        save2path(pBuf, 0, pBuf.length, "/sdcard/media_degbu.data", true);
+                    } else {
+                        bf.putInt(frameBuffer.length);
+                        save2path(bf.array(), 0, 5, "/sdcard/media_degbu.data", true);
+                        save2path(frameBuffer, 0, frameBuffer.length, "/sdcard/media_degbu.data", true);
+                    }
+                }
+            }
+        }
         final SourceCallBack callBack;
         synchronized (sCallbacks) {
             callBack = sCallbacks.get(_channelId);
@@ -238,52 +242,17 @@ public class Client implements Closeable {
                 buffer.order(ByteOrder.LITTLE_ENDIAN);
                 mi.videoCodec = buffer.getInt();
                 mi.fps = buffer.getInt();
-//                mi.videoQueueSize = buffer.getInt();
-
-
                 mi.audioCodec = buffer.getInt();
                 mi.sample = buffer.getInt();
                 mi.channel = buffer.getInt();
                 mi.bitPerSample = buffer.getInt();
-//                mi.audioQueueSize = buffer.getInt();
-
-
-//                int u32VpsLength = buffer.getInt();
                 mi.spsLen = buffer.getInt();
                 mi.ppsLen = buffer.getInt();
                 mi.sps = new byte[128];
                 mi.pps = new byte[36];
-//                u32SpsLength = Math.max(0, u32SpsLength);
-//                u32PpsLength = Math.max(0, u32PpsLength);
-//                u32SeiLength = Math.max(0, u32SeiLength);
-//
-//
-//                u32VpsLength = Math.min(u32VpsLength, 255);
-//                u32SpsLength = Math.min(u32SpsLength, 255);
-//                u32PpsLength = Math.min(u32PpsLength, 128);
-//                u32SeiLength = Math.min(u32SeiLength, 128);
-//
-//                byte []tmp = new byte[255];
+
                 buffer.get(mi.sps);
-//                mi.vps = new byte[u32VpsLength];
-//                System.arraycopy(tmp, 0, mi.vps, 0, u32VpsLength);
-//
                 buffer.get(mi.pps);
-//                mi.sps = new byte[u32SpsLength];
-//                System.arraycopy(tmp, 0, mi.sps, 0, u32SpsLength);
-//
-//                tmp = new byte[128];
-//
-//                buffer.get(tmp);
-//                mi.pps = new byte[u32PpsLength];
-//                System.arraycopy(tmp, 0, mi.pps, 0, u32PpsLength);
-//
-//
-//                buffer.get(tmp);
-//                mi.sei = new byte[u32SeiLength];
-//                System.arraycopy(tmp, 0, mi.sei, 0, u32SeiLength);
-
-
 //                    int videoCodec;int fps;
 //                    int audioCodec;int sample;int channel;int bitPerSample;
 //                    int spsLen;
@@ -332,6 +301,47 @@ public class Client implements Closeable {
                 Log.i(TAG,"channel_" + _channelId + " is paused!");
             }
             callBack.onSourceCallBack(_channelId, _channelPtr, _frameType, fi);
+        }
+    }
+
+    public static final class MediaInfo {
+//        Easy_U32 u32VideoCodec;				/*  ”∆µ±‡¬Î¿‡–Õ */
+//        Easy_U32 u32VideoFps;				/*  ”∆µ÷°¬  */
+//
+//        Easy_U32 u32AudioCodec;				/* “Ù∆µ±‡¬Î¿‡–Õ */
+//        Easy_U32 u32AudioSamplerate;		/* “Ù∆µ≤…—˘¬  */
+//        Easy_U32 u32AudioChannel;			/* “Ù∆µÕ®µ¿ ˝ */
+//        Easy_U32 u32AudioBitsPerSample;		/* “Ù∆µ≤…—˘æ´∂» */
+//
+//        Easy_U32 u32H264SpsLength;			/*  ”∆µsps÷°≥§∂» */
+//        Easy_U32 u32H264PpsLength;			/*  ”∆µpps÷°≥§∂» */
+//        Easy_U8	 u8H264Sps[128];			/*  ”∆µsps÷°ƒ⁄»› */
+//        Easy_U8	 u8H264Pps[36];				/*  ”∆µsps÷°ƒ⁄»› */
+
+        int videoCodec;
+        int fps;
+        int audioCodec;
+        int sample;
+        int channel;
+        int bitPerSample;
+        int spsLen;
+        int ppsLen;
+        byte[] sps;
+        byte[] pps;
+
+
+        @Override
+        public String toString() {
+            return "MediaInfo{" +
+                    "videoCodec=" + videoCodec +
+                    ", fps=" + fps +
+                    ", audioCodec=" + audioCodec +
+                    ", sample=" + sample +
+                    ", channel=" + channel +
+                    ", bitPerSample=" + bitPerSample +
+                    ", spsLen=" + spsLen +
+                    ", ppsLen=" + ppsLen +
+                    '}';
         }
     }
 

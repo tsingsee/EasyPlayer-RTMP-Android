@@ -2,6 +2,7 @@ package org.easydarwin.easyplayer.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,7 +25,9 @@ import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -38,17 +41,16 @@ import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.AngleView;
-import org.easydarwin.video.EasyPlayerClient;
 import org.easydarwin.video.Client;
-import org.esaydarwin.rtsp.player.R;
+import org.easydarwin.video.EasyPlayerClient;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -87,9 +89,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
      */
-//    public static final String KEY = "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
     public static final String KEY = "59617A414C5A36526D3432416855566170627035792B4676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A3062584170567778576F50394C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
-
 
     // TODO: Rename and change types of parameters
     protected String mUrl;
@@ -109,6 +109,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private ImageView mTakePictureThumb;
     private ResultReceiver mRR;
     protected ImageView cover;
+
+    private int mRatioType = ASPACT_RATIO_INSIDE;
     /**
      * 抓拍后隐藏thumb的task
      */
@@ -125,7 +127,22 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }
     };
     private boolean mFullscreenMode;
-    private int mRatioType = ASPACT_RATIO_CROPE_MATRIX;
+    private OnDoubleTapListener doubleTapListener;
+
+    public static PlayFragment newInstance(Context context, String url, ResultReceiver rr) {
+        PlayFragment fragment = new PlayFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, url);
+        boolean useUDP = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.key_udp_mode), false);
+        args.putInt(ARG_PARAM2, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP);
+        args.putParcelable(ARG_PARAM3, rr);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public void setOnDoubleTapListener(OnDoubleTapListener listener) {
+        this.doubleTapListener = listener;
+    }
 
     public void setSelected(boolean selected) {
         mSurfaceView.animate().scaleX(selected ? 0.9f : 1.0f);
@@ -134,6 +151,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     public long getReceivedStreamLength() {
+
         if (mStreamRender != null) {
             return mStreamRender.receivedDataLength();
         }
@@ -144,7 +162,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         if (!mStreamRender.isRecording()) {
             File f = new File(TheApp.sMoviePath);
             f.mkdirs();
-            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd-HH_mm_ss").format(new Date()) + ".mp4").getPath());
+            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".mp4").getPath());
             return true;
         } else {
             mStreamRender.stopRecord();
@@ -157,6 +175,96 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         public float getInterpolation(float paramFloat) {
             return super.getInterpolation(1.0f - paramFloat);
         }
+    }
+
+    @Override
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mSurfaceView = (TextureView) view.findViewById(R.id.surface_view);
+
+
+        mSurfaceView.setOpaque(false);
+        mSurfaceView.setSurfaceTextureListener(this);
+        mAngleView = (AngleView) getView().findViewById(R.id.render_angle_view);
+        mRenderCover = (ImageView) getView().findViewById(R.id.surface_cover);
+        mTakePictureThumb = (ImageView) getView().findViewById(R.id.live_video_snap_thumb);
+        mResultReceiver = new ResultReceiver(new Handler()) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                super.onReceiveResult(resultCode, resultData);
+                Activity activity = getActivity();
+                if (activity == null)return;
+                if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
+                    if (resultData != null) {
+                        int videoDecodeType = resultData.getInt(EasyPlayerClient.KEY_VIDEO_DECODE_TYPE, 0);
+                        Log.i(TAG, "视频解码方式:" + (videoDecodeType == 0 ? "软解码" : "硬解码"));
+                    }
+                    onVideoDisplayed();
+                } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
+                    mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);
+                    mHeight = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_HEIGHT);
+
+
+                    onVideoSizeChange();
+                } else if (resultCode == EasyPlayerClient.RESULT_TIMEOUT) {
+                    new AlertDialog.Builder(getActivity()).setMessage("试播时间到").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
+                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_AUDIO) {
+                    new AlertDialog.Builder(getActivity()).setMessage("音频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
+                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_VIDEO) {
+                    new AlertDialog.Builder(getActivity()).setMessage("视频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
+                }else if (resultCode == EasyPlayerClient.RESULT_EVENT){
+
+                    int errorcode = resultData.getInt("errorcode");
+//                    if (errorcode != 0){
+//                        stopRending();
+//                    }
+                    if (activity instanceof PlayActivity) {
+                        ((PlayActivity) activity).onEvent(PlayFragment.this, errorcode, resultData.getString("event-msg"));
+                    }
+                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN){
+                    if (activity instanceof PlayActivity)
+                        ((PlayActivity)activity).onRecordState(1);
+                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_END){
+                    if (activity instanceof PlayActivity)
+                        ((PlayActivity)activity).onRecordState(-1);
+                }
+            }
+        };
+
+        listener = new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                Log.d(TAG, String.format("onLayoutChange left:%d,top:%d,right:%d,bottom:%d->oldLeft:%d,oldTop:%d,oldRight:%d,oldBottom:%d", left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom));
+                if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
+
+                    onVideoSizeChange();
+                }
+            }
+        };
+        ViewGroup parent = (ViewGroup) view.getParent();
+        parent.addOnLayoutChangeListener(listener);
+
+        GestureDetector.SimpleOnGestureListener l = new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (doubleTapListener != null) doubleTapListener.onDoubleTab(PlayFragment.this);
+                return true;
+            }
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+        };
+
+        final GestureDetector gd = new GestureDetector(getContext(), l);
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gd.onTouchEvent(event);
+            }
+        });
     }
 
     public static PlayFragment newInstance(String url, int type, ResultReceiver rr) {
@@ -209,120 +317,12 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         return view;
     }
 
-    @Override
-    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mSurfaceView = (TextureView) view.findViewById(R.id.surface_view);
-
-
-
-
-        mSurfaceView.setOpaque(false);
-        mSurfaceView.setSurfaceTextureListener(this);
-        mAngleView = (AngleView) getView().findViewById(R.id.render_angle_view);
-        mRenderCover = (ImageView) getView().findViewById(R.id.surface_cover);
-        mTakePictureThumb = (ImageView) getView().findViewById(R.id.live_video_snap_thumb);
-        mResultReceiver = new ResultReceiver(new Handler()) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                super.onReceiveResult(resultCode, resultData);
-                Activity activity = getActivity();
-                if (activity == null)return;
-                if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
-
-                    onVideoDisplayed();
-                } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
-                    mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);
-                    mHeight = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_HEIGHT);
-
-
-                    onVideoSizeChange();
-                } else if (resultCode == EasyPlayerClient.RESULT_TIMEOUT) {
-                    new AlertDialog.Builder(getActivity()).setMessage("试播时间到").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_AUDIO) {
-                    new AlertDialog.Builder(getActivity()).setMessage("音频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_VIDEO) {
-                    new AlertDialog.Builder(getActivity()).setMessage("视频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                }else if (resultCode == EasyPlayerClient.RESULT_EVENT){
-
-                    int errorcode = resultData.getInt("errorcode");
-//                    if (errorcode != 0){
-//                        stopRending();
-//                    }
-                    if (activity instanceof PlayActivity) {
-                        String msg = resultData.getString("event-msg");
-                        if (!TextUtils.isEmpty(msg)) {
-                            ((PlayActivity) activity).onEvent(PlayFragment.this, errorcode, msg);
-                        }
-                    }
-                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN){
-                    if (activity instanceof PlayActivity)
-                        ((PlayActivity)activity).onRecordState(1);
-                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_END){
-                    if (activity instanceof PlayActivity)
-                        ((PlayActivity)activity).onRecordState(-1);
-                }
-            }
-        };
-
-        listener = new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                Log.d(TAG, String.format("onLayoutChange left:%d,top:%d,right:%d,bottom:%d->oldLeft:%d,oldTop:%d,oldRight:%d,oldBottom:%d", left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom));
-                if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
-                    if (!isLandscape()) {
-                        fixPlayerRatio(view, right - left, bottom - top);
-                    } else {
-                        PlayActivity activity = (PlayActivity) getActivity();
-                        if (!activity.multiWindows()) {
-                            view.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
-                            view.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                            view.requestLayout();
-                        } else {
-                            fixPlayerRatio(view, right - left, bottom - top);
-                        }
-                    }
-                }
-            }
-        };
-        ViewGroup parent = (ViewGroup) view.getParent();
-        parent.addOnLayoutChangeListener(listener);
-
-        if (mFullscreenMode) enterFullscreen();else quiteFullscreen();
-    }
-
-
-
     public void enterFullscreen() {
-        mFullscreenMode = true;
-        if (getView() == null){
-            return;
-        }
-        if (mAttacher != null) {
-            mAttacher.cleanup();
-        } mSurfaceView.setTransform(new Matrix());
-        mAngleView.setVisibility(View.GONE);
+        setScaleType(FILL_WINDOW);
     }
 
     public void quiteFullscreen() {
-        mFullscreenMode = false;
-        if (getView() == null){
-            return;
-        }
-        if (mAttacher != null) {
-            mAttacher.cleanup();
-        }
-        ViewGroup parent = (ViewGroup) getView().getParent();
-        parent.addOnLayoutChangeListener(listener);
-        fixPlayerRatio(getView(), parent.getWidth(), parent.getHeight());
-
-
-        mAttacher = new PhotoViewAttacher(mSurfaceView, mWidth, mHeight);
-        mAttacher.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        mAttacher.setOnMatrixChangeListener(PlayFragment.this);
-        mAttacher.update();
-        mAngleView.setVisibility(View.VISIBLE);
+        setScaleType(ASPACT_RATIO_CROPE_MATRIX);
     }
 
     private void onVideoSizeChange() {
@@ -339,6 +339,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
             mAttacher = new PhotoViewAttacher(mSurfaceView, mWidth, mHeight);
+            mAttacher.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+//                    ...
+                    return false;
+                }
+            });
             mAttacher.setScaleType(ImageView.ScaleType.CENTER_CROP);
             mAttacher.setOnMatrixChangeListener(PlayFragment.this);
             mAttacher.update();
@@ -363,7 +370,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                         mSurfaceView.getLayoutParams().width = (int) (getView().getHeight() * ratio + 0.5f);
                     }
                 }
-                    break;
+                break;
                 case ASPACT_RATIO_CENTER_CROPE: {
                     // 以更短的为基准
                     if (ratioView - ratio < 0){    // 屏幕比视频的宽高比更小.表示视频是过于宽屏了.
@@ -375,15 +382,20 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                         mSurfaceView.getLayoutParams().height = (int) (getView().getWidth() / ratio+ 0.5f);
                     }
                 }
-                    break;
+                break;
                 case FILL_WINDOW:{
                     mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
                     mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
                 }
-                    break;
+                break;
             }
         }
         mSurfaceView.requestLayout();
+    }
+
+    protected void sendResult(int resultCode, Bundle resultData) {
+        if (mRR != null)
+            mRR.send(resultCode, resultData);
     }
 
     private void onVideoDisplayed() {
@@ -466,9 +478,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     }
 
-    protected void sendResult(int resultCode, Bundle resultData) {
-        if (mRR != null)
-        mRR.send(resultCode, resultData);
+    public interface OnDoubleTapListener {
+        void onDoubleTab(PlayFragment f);
     }
 
     @Override
