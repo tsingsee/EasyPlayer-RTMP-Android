@@ -129,17 +129,16 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             mBinding.pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    doLoadData(true);
+                    mBinding.pullToRefresh.setRefreshing(false);
                 }
             });
-            doLoadData(false);
+
             mBinding.toolbarSetting.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     startActivity(new Intent(PlaylistActivity.this, SettingsActivity.class));
                 }
             });
-
         } else {
             mBinding.toolbarSetting.setVisibility(View.GONE);
             mBinding.pullToRefresh.setEnabled(false);
@@ -211,7 +210,6 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                         mCursor.close();
                         mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
                         mRecyclerView.getAdapter().notifyItemInserted(mCursor.getCount() - 1);
-                        showOrHideEmptyView();
                     }
                 }).setNegativeButton("取消", null).create();
                 dlg.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -234,7 +232,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         if (PlaylistActivity.isPro()) {
             url = "http://www.easydarwin.org/versions/easyplayer_pro/version.txt";
         } else {
-            url = "http://www.easydarwin.org/versions/easyplayer/version.txt";
+            url = "http://www.easydarwin.org/versions/easyplayer-rtmp/version.txt";
         }
         update = new UpdateMgr(this);
         update.checkUpdate(url);
@@ -255,95 +253,6 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 
     public static boolean isPro() {
         return BuildConfig.FLAVOR.equals("pro");
-    }
-
-    private void doLoadData(final boolean refresh) {
-        new AsyncTask<Void, Void, Cursor>() {
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                if (refresh) {
-                    mBinding.pullToRefresh.setRefreshing(true);
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Cursor cursor) {
-                super.onPostExecute(cursor);
-                mCursor.close();
-                mCursor = cursor;
-                showOrHideEmptyView();
-                mRecyclerView.getAdapter().notifyDataSetChanged();
-                if (refresh) {
-                    mBinding.pullToRefresh.setRefreshing(false);
-                }
-            }
-
-            @Override
-            protected Cursor doInBackground(Void... voids) {
-                try {
-                    String ip = PreferenceManager.getDefaultSharedPreferences(PlaylistActivity.this).getString(getString(R.string.key_ip), TheApp.DEFAULT_SERVER_IP);
-                    int port = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(PlaylistActivity.this).getString(getString(R.string.key_port), "10008"));
-
-                    OkHttpClient client = new OkHttpClient();
-
-                    Request request = new Request.Builder()
-                            .url(String.format("http://%s:%d/api/v1/getrtsplivesessions", ip, port))
-                            .build();
-
-                    Response response = client.newCall(request).execute();
-                    if (response.isSuccessful()) {
-                        /**
-                         * {
-                         "EasyDarwin" : {
-                         "Body" : {
-                         "SessionCount" : "1",
-                         "Sessions" : [
-                         {
-                         "AudienceNum" : 1,
-                         "index" : 0,
-                         "name" : "9",
-                         "url" : "rtsp://121.40.50.44:554/9.sdp"
-                         }
-                         ]
-                         },
-                         "Header" : {
-                         "CSeq" : "1",
-                         "MessageType" : "MSG_SC_RTSP_PUSH_SESSION_LIST_ACK",
-                         "Version" : "1.0"
-                         }
-                         }
-                         }
-                         */
-
-                        TheApp.sDB.delete(VideoSource.TABLE_NAME, VideoSource.INDEX + "!=?", new String[]{String.valueOf(-1)});
-                        JSONObject json = new JSONObject(response.body().string());
-                        JSONArray array = json.getJSONObject("EasyDarwin").getJSONObject("Body").getJSONArray("Sessions");
-
-//                    "AudienceNum" : 1,
-//                            "index" : 0,
-//                            "name" : "9",
-//                            "url" : "rtsp://121.40.50.44:554/9.sdp"
-
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject item = array.getJSONObject(i);
-                            ContentValues cv = new ContentValues();
-                            cv.put(VideoSource.INDEX, item.optInt("index"));
-                            cv.put(VideoSource.URL, item.optString("url"));
-                            cv.put(VideoSource.NAME, item.optString("name"));
-                            cv.put(VideoSource.AUDIENCE_NUMBER, item.optInt("AudienceNum"));
-                            TheApp.sDB.replace(VideoSource.TABLE_NAME, null, cv);
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
-            }
-        }.execute();
     }
 
     public static File url2localPosterFile(Context context, String url) {
@@ -419,7 +328,6 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                                 mCursor.close();
                                 mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
                                 mRecyclerView.getAdapter().notifyItemRemoved(pos);
-                                showOrHideEmptyView();
                             }
                         }).setNegativeButton("取消", null).show();
                     }
@@ -427,14 +335,6 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             }).show();
         }
         return true;
-    }
-
-    private void showOrHideEmptyView() {
-        if (mCursor.getCount() > 0) {
-            mBinding.emptyView.setVisibility(View.GONE);
-        } else {
-            mBinding.emptyView.setVisibility(View.VISIBLE);
-        }
     }
 
     public void onMultiplay(View view) {
