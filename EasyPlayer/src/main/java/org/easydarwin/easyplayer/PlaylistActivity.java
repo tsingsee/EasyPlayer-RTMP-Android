@@ -75,7 +75,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
         if (!mCursor.moveToFirst()){
             ContentValues cv = new ContentValues();
-            cv.put(VideoSource.URL, "rtmp://live.hkstv.hk.lxdns.com/live/hks");
+            cv.put(VideoSource.URL, "rtmp://live.hkstv.hk.lxdns.com/live/hks2");
             TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
             mCursor.close();
             mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
