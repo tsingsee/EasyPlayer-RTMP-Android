@@ -463,6 +463,7 @@ public class PlayActivity extends AppCompatActivity {
     private void onVideoDisplayed() {
         mBinding.liveVideoBar.liveVideoBarTakePicture.setEnabled(true);
         mBinding.liveVideoBar.liveVideoBarRecord.setEnabled(true);
+        mBinding.msgTxt.append(String.format("[%s]\t%s\n",new SimpleDateFormat("HH:mm:ss").format(new Date()),"播放中"));
     }
 
     private void onPlayStart() {

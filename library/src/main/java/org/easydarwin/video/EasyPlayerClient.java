@@ -780,9 +780,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         mAudioTrack.play();
                         handle = AudioCodec.create(frameInfo.codec, mMediaInfo.sample, mMediaInfo.channel, mMediaInfo.bitPerSample);
 
-                        Log.w(TAG, String.format("POST VIDEO_DISPLAYED IN AUDIO THREAD!!!"));
-                        ResultReceiver rr = mRR;
-                        if (rr != null) rr.send(RESULT_VIDEO_DISPLAYED, null);
+//                        Log.w(TAG, String.format("POST VIDEO_DISPLAYED IN AUDIO THREAD!!!"));
+//                        ResultReceiver rr = mRR;
+//                        if (rr != null) rr.send(RESULT_VIDEO_DISPLAYED, null);
 
                         // 半秒钟的数据缓存
                         byte[] mBufferReuse = new byte[16000];
