@@ -59,7 +59,7 @@
             android:layout_marginRight="16dp" />
 
         <TextView
-            android:text="Copyright © EasyDarwin.org 2012-2018"
+            android:text="Copyright © EasyDarwin.org 2012-2019"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:id="@+id/textView3"

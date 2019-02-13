@@ -9,8 +9,8 @@ android {
         applicationId "org.easydarwin.easyplayer.rtmp"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 36
-        versionName "1.2.18.1114"
+        versionCode 37
+        versionName "1.2.19.0213"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField 'boolean', 'YUV_EXPORT', 'false'
     }
@@ -19,6 +19,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
     }
     dataBinding {
         enabled = true
