@@ -14,6 +14,7 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
 import org.easydarwin.easyplayer.databinding.*;
+import org.easydarwin.video.Client;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -25,7 +26,21 @@ public class AboutActivity extends AppCompatActivity {
          binding = DataBindingUtil.setContentView(this, R.layout.activity_about);
 
         setSupportActionBar(binding.toolbar);
-        binding.title.setText("EasyPlayer RTMP播放器：");
+
+        int activeDays  = TheApp.activeDays;
+        SpannableString
+                activeDayString;
+        if (activeDays >= 9999) {
+            activeDayString = new SpannableString("激活码永久有效");
+            activeDayString.setSpan(new ForegroundColorSpan(Color.GREEN), 0, activeDayString.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }else if (activeDays > 0){
+            activeDayString = new SpannableString(String.format("激活码还剩%d天可用",activeDays));
+            activeDayString.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, activeDayString.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }else{
+            activeDayString = new SpannableString(String.format("激活码已过期(%d)",activeDays));
+            activeDayString.setSpan(new ForegroundColorSpan(Color.RED), 0, activeDayString.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }
+        binding.title.setText("EasyPlayer RTMP播放器("+activeDayString+")：");
         binding.desc.setText("EasyPlayer RTMP是由EasyDarwin开源团队开发 者开发和维护的一个RTMP播放器项目，目前 支持Windows/Android/iOS，视频支持 H.264/H.265/MPEG4/MJPEG，音频支持 G711A/G711U/G726/AAC，支持硬解码，是一套极佳的 RTMP播放组件！项目地址：");
 
         binding.desc.setMovementMethod(LinkMovementMethod.getInstance());

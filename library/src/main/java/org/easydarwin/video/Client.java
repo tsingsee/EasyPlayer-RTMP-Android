@@ -176,6 +176,8 @@ public class Client implements Closeable {
         }
     }
 
+    public native static int getActiveDays(Context context,String key);
+
     private static native int getErrorCode(long context);
 
     private native long init(Context context, String key);

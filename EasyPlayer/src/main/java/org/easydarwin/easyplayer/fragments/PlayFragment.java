@@ -39,6 +39,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.StringSignature;
 
+import org.easydarwin.easyplayer.BuildConfig;
 import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
 import org.easydarwin.easyplayer.R;
@@ -89,7 +90,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
      */
-    public static final String KEY = "59617A414C5A36526D34324144474A636F35337A4A654676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A306258437A567778576F502B6C3430566863336C4559584A33615735555A57467453584E55614756435A584E30514449774D54686C59584E35";
+//    public static final String KEY = "59617A414C5A36526D34324144474A636F35337A4A654676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A306258437A567778576F502B6C3430566863336C4559584A33615735555A57467453584E55614756435A584E30514449774D54686C59584E35";
+    public static final String KEY = BuildConfig.PLAYER_RTMP_KEY;
 
     // TODO: Rename and change types of parameters
     protected String mUrl;

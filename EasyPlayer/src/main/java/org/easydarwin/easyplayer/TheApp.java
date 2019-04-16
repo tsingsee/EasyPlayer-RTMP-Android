@@ -8,6 +8,8 @@ import android.preference.PreferenceManager;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.easydarwin.easyplayer.data.EasyDBHelper;
+import org.easydarwin.video.Client;
+
 /**
  * Created by afd on 8/13/16.
  */
@@ -17,10 +19,13 @@ public class TheApp extends Application {
     public static SQLiteDatabase sDB;
     public static String sPicturePath;
     public static String sMoviePath;
+    public static int activeDays = 9999;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
+        activeDays = Client.getActiveDays(this, BuildConfig.PLAYER_RTMP_KEY);
         sPicturePath = getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/EasyPlayer";
         sMoviePath = getExternalFilesDir(Environment.DIRECTORY_MOVIES) + "/EasyPlayer";
         sDB = new EasyDBHelper(this).getWritableDatabase();
