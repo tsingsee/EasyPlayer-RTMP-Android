@@ -13,7 +13,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.activity.PlayListActivity;
 import org.easydarwin.easyplayer.R;
 
 import java.io.IOException;
@@ -27,9 +27,11 @@ import okhttp3.Response;
  */
 public class UpdateMgr {
     private static final String TAG = "UpdateMgr";
+
     private Context mContext;
     private String mApkUrl;
     private Handler mHandler;
+
     private Runnable mShowDlg = new Runnable() {
         @Override
         public void run() {
@@ -42,7 +44,6 @@ public class UpdateMgr {
         mHandler = new Handler();
     }
 
-
     /**
      * 检测当前APP是否需要升级
      */
@@ -52,16 +53,17 @@ public class UpdateMgr {
             public void run() {
                 try {
                     String url;
-                    if (PlaylistActivity.isPro()) {
+
+                    if (PlayListActivity.isPro()) {
                         url = "http://www.easydarwin.org/versions/easyplayer_pro/version.txt";
-                    }else{
+                    } else {
                         url = "http://www.easydarwin.org/versions/easyplayer/version.txt";
                     }
+
                     OkHttpClient client = new OkHttpClient();
-                    Request request = new Request.Builder()
-                            .url(url)
-                            .build();
+                    Request request = new Request.Builder().url(url).build();
                     Response response = client.newCall(request).execute();
+
                     if (response.isSuccessful()) {
                         String string = response.body().string();
                         RemoteVersionInfo versionInfo = new Gson().fromJson(string, RemoteVersionInfo.class);
@@ -69,12 +71,16 @@ public class UpdateMgr {
                         if(versionInfo == null || TextUtils.isEmpty(versionInfo.getUrl())){
                             return;
                         }
+
                         PackageManager packageManager=mContext.getPackageManager();
+
                         try {
                             PackageInfo packageInfo=packageManager.getPackageInfo(mContext.getPackageName(),0);
                             int localVersionCode=packageInfo.versionCode;
                             int remoteVersionCode= Integer.valueOf(versionInfo.getVersionCode());
-                            Log.d(TAG, "kim localVersionCode="+localVersionCode+", remoteVersionCode="+remoteVersionCode);
+
+                            Log.d(TAG, "kim localVersionCode=" + localVersionCode+", remoteVersionCode=" + remoteVersionCode);
+
                             if(localVersionCode<remoteVersionCode){
                                 mApkUrl = versionInfo.getUrl();
                                 mHandler.post(mShowDlg);
@@ -93,13 +99,14 @@ public class UpdateMgr {
     /**
      * 提示升级对话框
      */
-    private void showUpdateDialog(){
-        final String apkUrl=mApkUrl;
+    private void showUpdateDialog() {
+        final String apkUrl = mApkUrl;
         Log.d(TAG, "kim showUpdateDialog. apkUrl="+apkUrl);
+
         new AlertDialog.Builder(mContext)
                 .setMessage("EasyPlayer可以升级到更高的版本，是否升级")
                 .setTitle("升级提示")
-                .setIcon(R.drawable.img_qrcode)
+                .setIcon(R.drawable.new_splash_rtmp)
                 .setPositiveButton("升级", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

@@ -20,7 +20,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-
     <ProgressBar
         android:id="@android:id/progress"
         android:layout_width="wrap_content"
@@ -49,7 +48,7 @@
         android:id="@+id/live_video_snap_thumb"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_gravity="right|bottom"
+        android:layout_gravity="right|top"
         android:layout_margin="3dp"
         android:clickable="true"
         android:gravity="center"
@@ -63,7 +62,6 @@
         style="@style/Widget.AppCompat.ActionButton"
         android:text="退出全屏"
         android:gravity="center"
-        android:id="@+id/quit_fullscreen"
         android:visibility="gone"
         android:textColor="#fff"
         android:layout_gravity="right|top"

@@ -4,6 +4,7 @@ package org.easydarwin.easyplayer.updatemgr;
  * Created by Kim on 2016/8/25.
  */
 public class RemoteVersionInfo {
+
     private String versionCode;
     private String versionName;
     private String url;

@@ -11,40 +11,29 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
     <application
-        android:name="org.easydarwin.easyplayer.TheApp"
+        android:name=".TheApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_foreground"
         android:label="@string/app_name"
         tools:replace="android:label"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <meta-data
             android:name="UMENG_APPKEY"
             android:value="5700bb7467e58ef3fd000648" />
+
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="@string/app_flavor" />
 
         <activity
-            android:name="org.easydarwin.easyplayer.PlayActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity
-            android:name="org.easydarwin.easyplayer.TwoWndPlayActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity
-            android:name="org.easydarwin.easyplayer.YUVExportActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity
-            android:name="org.easydarwin.easyplayer.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity
-            android:name="org.easydarwin.easyplayer.PlaylistActivity"
+            android:name=".activity.PlayListActivity"
             android:label="EasyPlayer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -52,19 +41,35 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name="org.easydarwin.easyplayer.SplashActivity"
+            android:name=".activity.PlayActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
+        <activity
+            android:name=".activity.YUVExportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:label="@string/title_activity_settings" />
+
+        <activity
+            android:name=".activity.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_splash"
             android:theme="@style/FullscreenTheme" />
+
+        <activity android:name=".activity.ScanQRActivity" />
+
         <activity
-            android:name="org.easydarwin.easyplayer.MediaFilesActivity"
+            android:name=".activity.MediaFilesActivity"
             android:label="文件夹" />
 
+        <activity android:name=".activity.AboutActivity"></activity>
 
-        <activity android:name="org.easydarwin.easyplayer.AboutActivity"></activity>
         <activity
-            android:name="org.easydarwin.easyplayer.MultiplayActivity"
+            android:name=".activity.MultiPlayActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"></activity>
     </application>
 

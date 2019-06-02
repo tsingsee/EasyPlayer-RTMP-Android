@@ -10,8 +10,16 @@
             android:layout_width="match_parent"
             android:layout_height="128dp"
             android:layout_margin="1dp"
+            android:background="#666"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/image_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/new_player"/>
 
         <CheckBox
             android:id="@+id/image_checkbox"
@@ -19,5 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|top"
             android:visibility="gone" />
+
     </FrameLayout>
 </layout>

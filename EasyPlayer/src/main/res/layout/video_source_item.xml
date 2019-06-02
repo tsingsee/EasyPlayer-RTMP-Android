@@ -50,7 +50,7 @@
                     android:minHeight="40dp"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
-                    android:text="实时观看人数:10"
+                    android:text="实时观看人数:0"
                     android:textColor="#ffffff" />
             </LinearLayout>
 

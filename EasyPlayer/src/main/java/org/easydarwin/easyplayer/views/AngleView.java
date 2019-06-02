@@ -11,7 +11,6 @@ import android.view.View;
 
 import org.easydarwin.easyplayer.R;
 
-
 /**
  * TODO: document your custom view class.
  */
@@ -63,7 +62,6 @@ public class AngleView extends View {
         mArcPaint.setStrokeWidth(mArcWidth);
         mArcPaint.setColor(mArcColor);
 
-
         mCirclePaint = new Paint(mArcPaint);
         mCirclePaint.setStyle(Paint.Style.FILL);
     }
@@ -101,8 +99,10 @@ public class AngleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         canvas.drawArc(mArcRec, mStartAngle, mSweepAngle, false, mArcPaint);
 //        canvas.drawRect(mArcRec, mArcPaint);
+
         final float r = mArcRec.width() * 0.5f; // 半径
 //            double tan = Math.tan(mCurrentAngle);
 //            float x = (float) Math.sqrt(r * r / (1 + tan * tan));//
@@ -141,6 +141,4 @@ public class AngleView extends View {
 
         canvas.drawLine(x1_near, y1_near, x1_far, y1_far, mArcPaint);
     }
-
-
 }

@@ -5,11 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Created by afd on 8/13/16.
+ * 视频源的数据库
  */
 public class EasyDBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "easydb.db";
+
     public EasyDBHelper(Context context) {
         super(context, DB_NAME, null, 2);
     }

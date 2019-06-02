@@ -2,12 +2,14 @@
 buildscript {
     ext.lifecycle_version = "1.1.1"
     ext.support_version = "26.1.0"
+
     repositories {
         google()
         jcenter()
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 

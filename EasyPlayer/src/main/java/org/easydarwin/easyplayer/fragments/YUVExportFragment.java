@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.TheApp;
+import org.easydarwin.easyplayer.util.FileUtil;
+import org.easydarwin.easyplayer.util.SPUtil;
 import org.easydarwin.easyplayer.views.OverlayCanvasView;
 import org.easydarwin.video.Client;
 import org.easydarwin.video.EasyPlayerClient;
@@ -29,23 +31,24 @@ import java.util.Date;
 /**
  * Created by apple on 2017/12/30.
  */
-
-public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback{
+public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback {
 
     OverlayCanvasView canvas;
+
     public static YUVExportFragment newInstance(String url, int type, ResultReceiver rr) {
-        YUVExportFragment fragment = new YUVExportFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, url);
         args.putInt(ARG_PARAM2, type);
         args.putParcelable(ARG_PARAM3, rr);
+
+        YUVExportFragment fragment = new YUVExportFragment();
         fragment.setArguments(args);
+
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         final View view = inflater.inflate(R.layout.fragment_play_overlay_canvas, container, false);
         cover = (ImageView) view.findViewById(R.id.surface_cover);
         canvas = view.findViewById(R.id.overlay_canvas);
@@ -57,19 +60,22 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
     protected void startRending(SurfaceTexture surface) {
         mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver, this);
 
-        boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
-
-        File f = new File(TheApp.sMoviePath);
-        f.mkdirs();
+        boolean autoRecord = SPUtil.getAutoRecord(getContext());
 
         try {
-            mStreamRender.start(mUrl, mType, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
-        }catch (Exception e){
+            mStreamRender.start(mUrl,
+                    mType,
+                    Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,
+                    "",
+                    "",
+                    autoRecord ? FileUtil.getMovieName(mUrl).getPath() : null);
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
-        sendResult(RESULT_REND_STARTED, null);
+
+        sendResult(RESULT_REND_START, null);
     }
 
     /**
@@ -88,9 +94,12 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
     private void writeToFile(String path, ByteBuffer buffer) {
         try {
             FileOutputStream fos = new FileOutputStream(path, true);
+
             byte[] in = new byte[buffer.capacity()];
+
             buffer.clear();
             buffer.get(in);
+
             fos.write(in);
             fos.close();
         } catch (Exception ex) {
@@ -101,6 +110,7 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
     @Override
     public void onMatrixChanged(Matrix matrix, RectF rect) {
         super.onMatrixChanged(matrix, rect);
+
         if (canvas != null) {
             canvas.setTransMatrix(matrix);
         }
