@@ -1,8 +1,11 @@
 package org.easydarwin.easyplayer.util;
 
 import android.os.Environment;
+import android.util.Base64;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -44,5 +47,16 @@ public class FileUtil {
         }
 
         return url;
+    }
+
+    /*
+    * 截屏
+    * */
+    public static File getSnapFile(String url) {
+        File file = new File(getPicturePath(url));
+        file.mkdirs();
+
+        File res = new File(file, "snap.jpg");
+        return res;
     }
 }
