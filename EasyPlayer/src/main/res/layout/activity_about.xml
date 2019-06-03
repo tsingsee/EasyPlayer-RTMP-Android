@@ -86,91 +86,35 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginRight="16dp"
-                    android:text="EasyDarwin开源流媒体服务器："
-                    android:textSize="14sp"
+                    android:layout_marginTop="8dp"
+                    android:text="项目地址：https://github.com/EasyDSS/EasyPlayer"
+                    android:textSize="15sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/desc" />
 
                 <TextView
-                    android:id="@+id/darwin_content_tv"
+                    android:id="@+id/darwin_tv2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="26dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="16dp"
-                    android:text="http://www.easydarwin.org"
-                    android:textSize="14sp"
-                    android:textColor="@color/colorTheme2"
+                    android:text="您也可以升级到我们的EasyPlayer Pro全功能版 本，支持HTTP/RTSP/RTMP/HLS等多种流媒体协议！戳我扫描如下的下载："
+                    android:textSize="15sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/darwin_tv" />
-
-                <TextView
-                    android:id="@+id/dss_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@+id/darwin_tv"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="20dp"
                     android:layout_marginRight="16dp"
-                    android:text="EasyDSS商用流媒体解决方案："
-                    android:textSize="14sp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/darwin_content_tv" />
-
-                <TextView
-                    android:id="@+id/dss_content_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="26dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="16dp"
-                    android:text="http://www.easydss.com"
-                    android:textSize="14sp"
-                    android:textColor="@color/colorTheme2"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/dss_tv" />
-
-                <TextView
-                    android:id="@+id/nvr_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginRight="16dp"
-                    android:text="EasyNVR无插件直播方案："
-                    android:textSize="14sp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/dss_content_tv" />
-
-                <TextView
-                    android:id="@+id/nvr_content_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="26dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="16dp"
-                    android:text="http://www.easynvr.com"
-                    android:textColor="@color/colorTheme2"
-                    android:textSize="14sp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/nvr_tv" />
+                    android:layout_marginTop="8dp"/>
 
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
                     android:layout_marginTop="30dp"
-                    android:src="@drawable/new_android_rtmp"
+                    android:src="@drawable/new_android_pro"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/nvr_content_tv" />
+                    app:layout_constraintTop_toBottomOf="@+id/darwin_tv2" />
 
                 <TextView
                     android:text="Copyright @ Open.TSINGSEE.com"

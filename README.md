@@ -1,6 +1,6 @@
 # EasyPlayer-RTMP #
 
-EasyPlayer-**RTMP** Android 播放器是由[TSINGSEE青犀开放平台](http://open.tsingsee.com "TSINGSEE青犀开放平台")开发和维护的一个完善的RTMP安卓流媒体播放器项目，视频编码支持**H.264**（可以扩展H.265），音频支持**AAC**，支持RTMP/FLV协议，支持**硬解码**，**软解码**，是一套极佳的安防流媒体平台播放组件！EasyPlayer-RTMP Android 安卓版本经过了很多年的发展和迭代，已经非常稳定、完整，功能包括：直播、录像、抓图，支持指令集包括armv7a、armv8a、x86，应该说是目前市面上功能性、稳定性和完整性最强的一款RTMP播放器，轻！稳定！可控！
+EasyPlayer-**RTMP** Android 播放器是由[TSINGSEE青犀开放平台](http://open.tsingsee.com "TSINGSEE青犀开放平台")开发和维护的一个完善的RTMP安卓流媒体播放器项目，视频编码支持**H.264**（可以扩展H.265），音频支持**AAC**，支持RTMP/FLV协议，支持**硬解码**，**软解码**，是一套极佳的安防流媒体平台播放组件！EasyPlayer-RTMP Android 安卓版本经过了很多年的发展和迭代，已经非常稳定、完整，功能包括：直播、录像、抓图，支持指令集包括armv7a、armv8a、x86，应该说是目前市面上功能性、稳定性和完整性最强的一款RTMP播放器！
 
 
 ## 工作流程 ##

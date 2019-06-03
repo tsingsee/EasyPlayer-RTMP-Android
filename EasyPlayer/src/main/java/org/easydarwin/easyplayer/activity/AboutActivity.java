@@ -17,6 +17,7 @@ import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.databinding.*;
 
 public class AboutActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String EP_URL = "https://github.com/EasyDSS/EasyPlayer";
 
     private ActivityAboutBinding binding;
 
@@ -68,26 +69,39 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         binding.version.append(ss);
         binding.version.append(")");
 
-        binding.darwinContentTv.setOnClickListener(this);
-        binding.dssContentTv.setOnClickListener(this);
-        binding.nvrContentTv.setOnClickListener(this);
+        binding.darwinTv2.setText("您也可以升级到我们的EasyPlayer Pro全功能版 本，支持HTTP/RTSP/RTMP/HLS等多种流媒体协议！");
+        SpannableString ss2 = new SpannableString("戳我");
+        ss2.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorTheme2)),
+                0,
+                ss2.length(),
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        binding.darwinTv2.append(ss2);
+        binding.darwinTv2.append("扫描如下的下载：");
+
+        binding.darwinTv.setText("项目地址：");
+        SpannableString ss3 = new SpannableString(EP_URL);
+        ss3.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorTheme2)),
+                0,
+                ss3.length(),
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        binding.darwinTv.append(ss3);
+
+        binding.darwinTv2.setOnClickListener(this);
+        binding.darwinTv.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         Intent intent= new Intent();
         intent.setAction("android.intent.action.VIEW");
-        Uri content_url = Uri.parse("http://www.easydarwin.org");
+        Uri content_url = Uri.parse(EP_URL);
 
         switch (v.getId()) {
-            case R.id.darwin_content_tv:
-                content_url = Uri.parse("http://www.easydarwin.org");
+            case R.id.darwin_tv:
+                content_url = Uri.parse(EP_URL);
                 break;
-            case R.id.dss_content_tv:
-                content_url = Uri.parse("http://www.easydss.com");
-                break;
-            case R.id.nvr_content_tv:
-                content_url = Uri.parse("http://www.easynvr.com");
+            case R.id.darwin_tv2:
+                content_url = Uri.parse(EP_URL);
                 break;
         }
 

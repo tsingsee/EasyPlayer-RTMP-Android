@@ -287,6 +287,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        onVideoDisplayed();
+    }
+
+    @Override
     public void onDestroyView() {
         ViewGroup parent = (ViewGroup) getView().getParent();
         parent.removeOnLayoutChangeListener(listener);
