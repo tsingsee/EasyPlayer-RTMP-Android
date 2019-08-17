@@ -212,8 +212,7 @@ public final class ParsableByteArray {
    * Reads the next two bytes as an unsigned value.
    */
   public int readUnsignedShort() {
-    return (data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF);
+    return (data[position++] & 0xFF) << 8 | (data[position++] & 0xFF);
   }
 
   /**
@@ -227,8 +226,7 @@ public final class ParsableByteArray {
    * Reads the next two bytes as an signed value.
    */
   public short readShort() {
-    return (short) ((data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF));
+    return (short) ((data[position++] & 0xFF) << 8 | (data[position++] & 0xFF));
   }
 
   /**
@@ -243,8 +241,8 @@ public final class ParsableByteArray {
    */
   public int readUnsignedInt24() {
     return (data[position++] & 0xFF) << 16
-        | (data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF);
+            | (data[position++] & 0xFF) << 8
+            | (data[position++] & 0xFF);
   }
 
   /**
@@ -252,8 +250,8 @@ public final class ParsableByteArray {
    */
   public int readLittleEndianInt24() {
     return (data[position++] & 0xFF)
-        | (data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF) << 16;
+            | (data[position++] & 0xFF) << 8
+            | (data[position++] & 0xFF) << 16;
   }
 
   /**
@@ -261,8 +259,8 @@ public final class ParsableByteArray {
    */
   public int readLittleEndianUnsignedInt24() {
     return (data[position++] & 0xFF)
-        | (data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF) << 16;
+            | (data[position++] & 0xFF) << 8
+            | (data[position++] & 0xFF) << 16;
   }
 
   /**
@@ -270,9 +268,9 @@ public final class ParsableByteArray {
    */
   public long readUnsignedInt() {
     return (data[position++] & 0xFFL) << 24
-        | (data[position++] & 0xFFL) << 16
-        | (data[position++] & 0xFFL) << 8
-        | (data[position++] & 0xFFL);
+            | (data[position++] & 0xFFL) << 16
+            | (data[position++] & 0xFFL) << 8
+            | (data[position++] & 0xFFL);
   }
 
   /**
@@ -337,9 +335,9 @@ public final class ParsableByteArray {
    * Reads the next four bytes, returning the integer portion of the fixed point 16.16 integer.
    */
   public int readUnsignedFixedPoint1616() {
-    int result = (data[position++] & 0xFF) << 8
-        | (data[position++] & 0xFF);
+    int result = (data[position++] & 0xFF) << 8 | (data[position++] & 0xFF);
     position += 2; // Skip the non-integer portion.
+
     return result;
   }
 
@@ -356,6 +354,7 @@ public final class ParsableByteArray {
     int b2 = readUnsignedByte();
     int b3 = readUnsignedByte();
     int b4 = readUnsignedByte();
+
     return (b1 << 21) | (b2 << 14) | (b3 << 7) | b4;
   }
 
@@ -366,9 +365,11 @@ public final class ParsableByteArray {
    */
   public int readUnsignedIntToInt() {
     int result = readInt();
+
     if (result < 0) {
       throw new IllegalStateException("Top bit not zero: " + result);
     }
+
     return result;
   }
 
@@ -380,9 +381,11 @@ public final class ParsableByteArray {
    */
   public int readLittleEndianUnsignedIntToInt() {
     int result = readLittleEndianInt();
+
     if (result < 0) {
       throw new IllegalStateException("Top bit not zero: " + result);
     }
+
     return result;
   }
 
@@ -393,9 +396,11 @@ public final class ParsableByteArray {
    */
   public long readUnsignedLongToLong() {
     long result = readLong();
+
     if (result < 0) {
       throw new IllegalStateException("Top bit not zero: " + result);
     }
+
     return result;
   }
 
@@ -450,29 +455,40 @@ public final class ParsableByteArray {
     if (bytesLeft() == 0) {
       return null;
     }
+
     int lineLimit = position;
+
     while (lineLimit < limit && data[lineLimit] != '\n' && data[lineLimit] != '\r') {
       lineLimit++;
     }
-    if (lineLimit - position >= 3 && data[position] == (byte) 0xEF
-        && data[position + 1] == (byte) 0xBB && data[position + 2] == (byte) 0xBF) {
+
+    if (lineLimit - position >= 3
+            && data[position] == (byte) 0xEF
+            && data[position + 1] == (byte) 0xBB
+            && data[position + 2] == (byte) 0xBF) {
       // There's a byte order mark at the start of the line. Discard it.
       position += 3;
     }
+
     String line = new String(data, position, lineLimit - position);
     position = lineLimit;
+
     if (position == limit) {
       return line;
     }
+
     if (data[position] == '\r') {
       position++;
+
       if (position == limit) {
         return line;
       }
     }
+
     if (data[position] == '\n') {
       position++;
     }
+
     return line;
   }
 
@@ -485,6 +501,7 @@ public final class ParsableByteArray {
   public long readUtf8EncodedLong() {
     int length = 0;
     long value = data[position];
+
     // find the high most 0 bit
     for (int j = 7; j >= 0; j--) {
       if ((value & (1 << j)) == 0) {
@@ -497,18 +514,22 @@ public final class ParsableByteArray {
         break;
       }
     }
+
     if (length == 0) {
       throw new NumberFormatException("Invalid UTF-8 sequence first byte: " + value);
     }
+
     for (int i = 1; i < length; i++) {
       int x = data[position + i];
+
       if ((x & 0xC0) != 0x80) { // if the high most 0 bit not 7th
         throw new NumberFormatException("Invalid UTF-8 sequence continuation byte: " + value);
       }
+
       value = (value << 6) | (x & 0x3F);
     }
+
     position += length;
     return value;
   }
-
 }

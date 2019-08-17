@@ -1,9 +1,12 @@
 package org.easydarwin.audio;
 
 /**
+ * 音频解码器
+ *
  * Created by John on 2016/3/18.
  */
 public class AudioCodec {
+
     static {
         System.loadLibrary("proffmpeg");
         System.loadLibrary("AudioCodecer");

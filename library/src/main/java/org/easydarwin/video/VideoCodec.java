@@ -3,9 +3,10 @@ package org.easydarwin.video;
 import java.nio.ByteBuffer;
 
 /**
+ * 视频软解码器
+ *
  * Created by John on 2017/1/5.
  */
-
 public class VideoCodec {
 
     static {
@@ -13,26 +14,25 @@ public class VideoCodec {
         System.loadLibrary("VideoCodecer");
     }
 
-    public static final int DECODER_H264 = 0;
-    public static final int DECODER_H265 = 1;
-
-    private native long create(Object surface, int codec);
-
-    private native void close(long handle);
+//    public static final int DECODER_H264 = 0;
+//    public static final int DECODER_H265 = 1;
 
     protected long mHandle;
 
+    private native long create(Object surface, int codec);
+    private native void close(long handle);
     private native int decode(long handle, byte[] in, int offset, int length,int []size);
     private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int []size);
     private native void releaseYUV(ByteBuffer buffer);
-
     private native void decodeYUV2(long handle,ByteBuffer buffer, int width, int height);
 
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
+
         if (mHandle != 0) {
             return 0;
         }
+
         return -1;
     }
 
@@ -46,7 +46,6 @@ public class VideoCodec {
         return buffer;
     }
 
-
     public void decoder_releaseBuffer(ByteBuffer buffer) {
         releaseYUV(buffer);
     }
@@ -54,7 +53,6 @@ public class VideoCodec {
     public void decoder_decodeBuffer(ByteBuffer buffer, int width, int height) {
         decodeYUV2(mHandle, buffer, width, height);
     }
-
 
     public void decoder_close() {
         if (mHandle == 0) {
@@ -64,9 +62,7 @@ public class VideoCodec {
         mHandle = 0;
     }
 
-
     public static class VideoDecoderLite extends VideoCodec {
-
         private int[] mSize;
         private Object surface;
 
@@ -74,6 +70,7 @@ public class VideoCodec {
 //            if (surface == null) {
 //                throw new NullPointerException("surface is null!");
 //            }
+
             this.surface = surface;
             decoder_create(surface, h264 ? 0 : 1);
             mSize = new int[2];
@@ -84,7 +81,7 @@ public class VideoCodec {
         }
 
         protected int decodeFrame(Client.FrameInfo aFrame, int[] size) {
-            int nRet = 0;
+            int nRet;
             nRet = decoder_decode( aFrame.buffer, aFrame.offset, aFrame.length, size);
             return nRet;
         }
@@ -96,6 +93,5 @@ public class VideoCodec {
         protected void releaseBuffer(ByteBuffer buffer){
             decoder_releaseBuffer(buffer);
         }
-
     }
 }

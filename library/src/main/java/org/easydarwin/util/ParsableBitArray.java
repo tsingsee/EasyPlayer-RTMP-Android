@@ -31,7 +31,9 @@ public final class ParsableBitArray {
   /**
    * Creates a new instance that initially has no backing data.
    */
-  public ParsableBitArray() {}
+  public ParsableBitArray() {
+
+  }
 
   /**
    * Creates a new instance that wraps an existing array.
@@ -108,10 +110,12 @@ public final class ParsableBitArray {
   public void skipBits(int n) {
     byteOffset += (n / 8);
     bitOffset += (n % 8);
+
     if (bitOffset > 7) {
       byteOffset++;
       bitOffset -= 8;
     }
+
     assertValidOffset();
   }
 
@@ -139,14 +143,16 @@ public final class ParsableBitArray {
 
     // Read as many whole bytes as we can.
     int wholeBytes = (numBits / 8);
+
     for (int i = 0; i < wholeBytes; i++) {
       int byteValue;
+
       if (bitOffset != 0) {
-        byteValue = ((data[byteOffset] & 0xFF) << bitOffset)
-            | ((data[byteOffset + 1] & 0xFF) >>> (8 - bitOffset));
+        byteValue = ((data[byteOffset] & 0xFF) << bitOffset) | ((data[byteOffset + 1] & 0xFF) >>> (8 - bitOffset));
       } else {
         byteValue = data[byteOffset];
       }
+
       numBits -= 8;
       returnValue |= (byteValue & 0xFF) << numBits;
       byteOffset++;
@@ -159,12 +165,12 @@ public final class ParsableBitArray {
 
       if (nextBit > 8) {
         // Combine bits from current byte and next byte.
-        returnValue |= ((((data[byteOffset] & 0xFF) << (nextBit - 8)
-            | ((data[byteOffset + 1] & 0xFF) >> (16 - nextBit))) & writeMask));
+        returnValue |= ((((data[byteOffset] & 0xFF) << (nextBit - 8) | ((data[byteOffset + 1] & 0xFF) >> (16 - nextBit))) & writeMask));
         byteOffset++;
       } else {
         // Bits to be read only within current byte.
         returnValue |= (((data[byteOffset] & 0xFF) >> (8 - nextBit)) & writeMask);
+
         if (nextBit == 8) {
           byteOffset++;
         }
@@ -180,5 +186,4 @@ public final class ParsableBitArray {
   private void assertValidOffset() {
     // It is fine for position to be at the end of the array, but no further.
   }
-
 }

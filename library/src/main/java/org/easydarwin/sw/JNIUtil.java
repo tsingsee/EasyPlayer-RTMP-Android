@@ -1,6 +1,7 @@
 package org.easydarwin.sw;
 
 /**
+ *
  */
 public class JNIUtil {
 
@@ -36,7 +37,6 @@ public class JNIUtil {
 
     private static native void callMethod(String methodName, Object[] returnValue, Object... params);
 
-
     /**
      * 0 NULL,
      * 1 yuv_to_yvu,
@@ -66,5 +66,4 @@ public class JNIUtil {
      * @param mode
      */
     public static native void argb2yuv(byte[] argb, byte[] yuv, int width, int height, int mode);
-
 }

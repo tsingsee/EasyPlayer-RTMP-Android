@@ -3,21 +3,23 @@ package org.easydarwin.video;
 import java.lang.annotation.Native;
 
 /**
+ * 合成音视频文件
+ *
  * Created by John on 2017/1/10.
  */
-
 public class EasyMuxer2 {
 
     static {
         System.loadLibrary("proffmpeg");
         System.loadLibrary("VideoCodecer");
     }
+
     public static final int AVMEDIA_TYPE_VIDEO  = 0;
     public static final int AVMEDIA_TYPE_AUDIO  = 1;
 
-
     public static final int VIDEO_TYPE_H264 = 0;
     public static final int VIDEO_TYPE_H265 = 1;
+
     @Native
     private long ctx;
 

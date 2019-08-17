@@ -14,18 +14,18 @@ import org.easydarwin.video.EasyPlayerClient;
 /**
  * Created by apple on 2017/9/9.
  */
-
 public class EasyPlayer {
 
     private static final java.lang.String LOG_TAG = "EasyPlayer";
+
     private final int mTransport;
     private final String mPath;
     private final String mKey;
+
     private Surface surface;
     private EasyPlayerClient mRTSPClient;
 
-    private static class ComponentListener implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener
-    {
+    private static class ComponentListener implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
@@ -63,87 +63,88 @@ public class EasyPlayer {
         }
     }
 
-    public static class EasyPlayerFactory{
+    public static class EasyPlayerFactory {
 
         private Uri mURI;
         private int mTransportMode = TRANSPORT_MODE_TCP;
 
         public static final int TRANSPORT_MODE_TCP = 1;
         public static final int SETRANSPORT_MODE_UDP = 2;
+
         private String mKey;
         private boolean autoPlayWhenReady;
 
         // 定义Type类型
         @IntDef({TRANSPORT_MODE_TCP, SETRANSPORT_MODE_UDP})
         public @interface TRANSPORT_MODE {
+
         }
 
-        public EasyPlayerFactory setUri(Uri uri){
+        public EasyPlayerFactory setUri(Uri uri) {
             String scheme = uri.getScheme();
+
             if (!"rtsp".equalsIgnoreCase(scheme)){
                 throw new IllegalArgumentException("only support rtsp stream.");
             }
+
             mURI = uri;
+
             return this;
         }
 
-        public EasyPlayerFactory setPath(String path){
+        public EasyPlayerFactory setPath(String path) {
             setUri(Uri.parse(path));
             return this;
         }
 
-        public EasyPlayerFactory setAutoPlayWhenReady(boolean autoPlayWhenReady){
+        public EasyPlayerFactory setAutoPlayWhenReady(boolean autoPlayWhenReady) {
             this.autoPlayWhenReady = autoPlayWhenReady;
             return this;
         }
 
-        public EasyPlayerFactory setKey(String key){
+        public EasyPlayerFactory setKey(String key) {
             mKey = key;
             return this;
         }
 
-        public EasyPlayerFactory setTransportMode(@TRANSPORT_MODE int transport){
+        public EasyPlayerFactory setTransportMode(@TRANSPORT_MODE int transport) {
             mTransportMode = transport;
             return this;
         }
-        public EasyPlayer build(){
 
-            if (mURI == null) throw new NullPointerException("uri should not be null!");
-            if (mKey == null) throw new NullPointerException("key should not be null!");
+        public EasyPlayer build() {
+            if (mURI == null)
+                throw new NullPointerException("uri should not be null!");
+
+            if (mKey == null)
+                throw new NullPointerException("key should not be null!");
 
             return new EasyPlayer(mKey, mURI.getPath(), mTransportMode);
         }
-
-
-
     }
 
-    private EasyPlayer(String key, String path, @EasyPlayerFactory.TRANSPORT_MODE int transport){
+    private EasyPlayer(String key, String path, @EasyPlayerFactory.TRANSPORT_MODE int transport) {
         mKey = key;
         mPath = path;
         mTransport = transport;
     }
 
+    public void create() {
 
-    public void create(){
     }
 
-
-    public void destroy(){
+    public void destroy() {
         removeSurfaceCallbacks();
     }
 
-
-
-
     private TextureView textureView;
     private SurfaceHolder surfaceHolder;
-    private final ComponentListener componentListener = new ComponentListener(){
+
+    private final ComponentListener componentListener = new ComponentListener() {
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             super.surfaceCreated(surfaceHolder);
             surface = surfaceHolder.getSurface();
-
         }
 
         @Override
@@ -172,20 +173,19 @@ public class EasyPlayer {
             } else {
                 textureView.setSurfaceTextureListener(null);
             }
+
             textureView = null;
         }
+
         if (surfaceHolder != null) {
             surfaceHolder.removeCallback(componentListener);
             surfaceHolder = null;
         }
     }
 
-
-
     private void setVideoSurfaceInternal(Surface surface) {
         this.surface = surface;
     }
-
 
     /**
      * Sets the {@link SurfaceHolder} that holds the {@link Surface} onto which video will be
@@ -196,6 +196,7 @@ public class EasyPlayer {
     public void setVideoSurfaceHolder(SurfaceHolder surfaceHolder) {
         removeSurfaceCallbacks();
         this.surfaceHolder = surfaceHolder;
+
         if (surfaceHolder == null) {
             setVideoSurfaceInternal(null);
         } else {
@@ -236,15 +237,16 @@ public class EasyPlayer {
     public void setVideoTextureView(TextureView textureView) {
         removeSurfaceCallbacks();
         this.textureView = textureView;
+
         if (textureView == null) {
             setVideoSurfaceInternal(null);
         } else {
             if (textureView.getSurfaceTextureListener() != null) {
                 Log.w(LOG_TAG, "Replacing existing SurfaceTextureListener.");
             }
+
             textureView.setSurfaceTextureListener(componentListener);
-            SurfaceTexture surfaceTexture = textureView.isAvailable() ? textureView.getSurfaceTexture()
-                    : null;
+            SurfaceTexture surfaceTexture = textureView.isAvailable() ? textureView.getSurfaceTexture() : null;
             setVideoSurfaceInternal(surfaceTexture == null ? null : new Surface(surfaceTexture));
         }
     }

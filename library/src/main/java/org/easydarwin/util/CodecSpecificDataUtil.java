@@ -35,6 +35,7 @@ public final class CodecSpecificDataUtil {
   };
 
   private static final int AUDIO_SPECIFIC_CONFIG_CHANNEL_CONFIGURATION_INVALID = -1;
+
   /**
    * In the channel configurations below, <A> indicates a single channel element; (A, B) indicates a
    * channel pair element; and [A] indicates a low-frequency effects element.
@@ -77,7 +78,9 @@ public final class CodecSpecificDataUtil {
   // Parametric Stereo.
   private static final int AUDIO_OBJECT_TYPE_PS = 29;
 
-  private CodecSpecificDataUtil() {}
+  private CodecSpecificDataUtil() {
+
+  }
 
   /**
    * Parses an AudioSpecificConfig, as defined in ISO 14496-3 1.6.2.1
@@ -87,15 +90,19 @@ public final class CodecSpecificDataUtil {
    */
   public static Pair<Integer, Integer> parseAacAudioSpecificConfig(byte[] audioSpecificConfig) {
     ParsableBitArray bitArray = new ParsableBitArray(audioSpecificConfig);
+
     int audioObjectType = bitArray.readBits(5);
     int frequencyIndex = bitArray.readBits(4);
     int sampleRate;
+
     if (frequencyIndex == AUDIO_SPECIFIC_CONFIG_FREQUENCY_INDEX_ARBITRARY) {
       sampleRate = bitArray.readBits(24);
     } else {
       sampleRate = AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE[frequencyIndex];
     }
+
     int channelConfiguration = bitArray.readBits(4);
+
     if (audioObjectType == AUDIO_OBJECT_TYPE_SBR || audioObjectType == AUDIO_OBJECT_TYPE_PS) {
       // For an AAC bitstream using spectral band replication (SBR) or parametric stereo (PS) with
       // explicit signaling, we return the extension sampling frequency as the sample rate of the
@@ -103,18 +110,23 @@ public final class CodecSpecificDataUtil {
       // the sample rate set above.
       // Use the extensionSamplingFrequencyIndex.
       frequencyIndex = bitArray.readBits(4);
+
       if (frequencyIndex == AUDIO_SPECIFIC_CONFIG_FREQUENCY_INDEX_ARBITRARY) {
         sampleRate = bitArray.readBits(24);
       } else {
         sampleRate = AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE[frequencyIndex];
       }
+
       audioObjectType = bitArray.readBits(5);
+
       if (audioObjectType == AUDIO_OBJECT_TYPE_ER_BSAC) {
         // Use the extensionChannelConfiguration.
         channelConfiguration = bitArray.readBits(4);
       }
     }
+
     int channelCount = AUDIO_SPECIFIC_CONFIG_CHANNEL_COUNT_TABLE[channelConfiguration];
+
     return Pair.create(sampleRate, channelCount);
   }
 
@@ -127,21 +139,26 @@ public final class CodecSpecificDataUtil {
    */
   public static byte[] buildAacLcAudioSpecificConfig(int sampleRate, int numChannels) {
     int sampleRateIndex = C.INDEX_UNSET;
+
     for (int i = 0; i < AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE.length; ++i) {
       if (sampleRate == AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE[i]) {
         sampleRateIndex = i;
       }
     }
+
     int channelConfig = C.INDEX_UNSET;
+
     for (int i = 0; i < AUDIO_SPECIFIC_CONFIG_CHANNEL_COUNT_TABLE.length; ++i) {
       if (numChannels == AUDIO_SPECIFIC_CONFIG_CHANNEL_COUNT_TABLE[i]) {
         channelConfig = i;
       }
     }
+
     if (sampleRate == C.INDEX_UNSET || channelConfig == C.INDEX_UNSET) {
       throw new IllegalArgumentException("Invalid sample rate or number of channels: "
           + sampleRate + ", " + numChannels);
     }
+
     return buildAacAudioSpecificConfig(AUDIO_OBJECT_TYPE_AAC_LC, sampleRateIndex, channelConfig);
   }
 
@@ -153,11 +170,12 @@ public final class CodecSpecificDataUtil {
    * @param channelConfig The channel configuration.
    * @return The AudioSpecificConfig.
    */
-  public static byte[] buildAacAudioSpecificConfig(int audioObjectType, int sampleRateIndex,
-      int channelConfig) {
+  public static byte[] buildAacAudioSpecificConfig(int audioObjectType, int sampleRateIndex, int channelConfig) {
     byte[] specificConfig = new byte[2];
+
     specificConfig[0] = (byte) (((audioObjectType << 3) & 0xF8) | ((sampleRateIndex >> 1) & 0x07));
     specificConfig[1] = (byte) (((sampleRateIndex << 7) & 0x80) | ((channelConfig << 3) & 0x78));
+
     return specificConfig;
   }
 
@@ -171,8 +189,10 @@ public final class CodecSpecificDataUtil {
    */
   public static byte[] buildNalUnit(byte[] data, int offset, int length) {
     byte[] nalUnit = new byte[length + NAL_START_CODE.length];
+
     System.arraycopy(NAL_START_CODE, 0, nalUnit, 0, NAL_START_CODE.length);
     System.arraycopy(data, offset, nalUnit, NAL_START_CODE.length, length);
+
     return nalUnit;
   }
 
@@ -192,13 +212,17 @@ public final class CodecSpecificDataUtil {
       // data does not consist of NAL start code delimited units.
       return null;
     }
+
     List<Integer> starts = new ArrayList<>();
     int nalUnitIndex = 0;
+
     do {
       starts.add(nalUnitIndex);
       nalUnitIndex = findNalStartCode(data, nalUnitIndex + NAL_START_CODE.length);
     } while (nalUnitIndex != C.INDEX_UNSET);
+
     byte[][] split = new byte[starts.size()][];
+
     for (int i = 0; i < starts.size(); i++) {
       int startIndex = starts.get(i);
       int endIndex = i < starts.size() - 1 ? starts.get(i + 1) : data.length;
@@ -206,6 +230,7 @@ public final class CodecSpecificDataUtil {
       System.arraycopy(data, startIndex, nal, 0, nal.length);
       split[i] = nal;
     }
+
     return split;
   }
 
@@ -218,11 +243,13 @@ public final class CodecSpecificDataUtil {
    */
   private static int findNalStartCode(byte[] data, int index) {
     int endIndex = data.length - NAL_START_CODE.length;
+
     for (int i = index; i <= endIndex; i++) {
       if (isNalStartCode(data, i)) {
         return i;
       }
     }
+
     return C.INDEX_UNSET;
   }
 
@@ -237,12 +264,13 @@ public final class CodecSpecificDataUtil {
     if (data.length - index <= NAL_START_CODE.length) {
       return false;
     }
+
     for (int j = 0; j < NAL_START_CODE.length; j++) {
       if (data[index + j] != NAL_START_CODE[j]) {
         return false;
       }
     }
+
     return true;
   }
-
 }
