@@ -39,7 +39,6 @@ import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.BuildConfig;
 import org.easydarwin.easyplayer.activity.PlayActivity;
-import org.easydarwin.easyplayer.activity.PlayListActivity;
 import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.util.FileUtil;
 import org.easydarwin.easyplayer.util.SPUtil;
@@ -51,8 +50,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
 import uk.copywitchshame.senab.photoview.gestures.PhotoViewAttacher;
@@ -102,6 +99,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private ImageView mRenderCover;
     private ImageView mTakePictureThumb;// 显示抓拍的图片
     protected TextureView mSurfaceView;
+    private SurfaceTexture mSurfaceTexture;
     protected ImageView cover;
 
     private MediaScannerConnection mScanner;
@@ -647,7 +645,11 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        startRending(surface);
+        if (mSurfaceTexture != null) {
+            mSurfaceView.setSurfaceTexture(mSurfaceTexture);
+        } else {
+            startRending(surface);
+        }
     }
 
     @Override
@@ -659,9 +661,11 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        stopRending();
+        mSurfaceTexture = surface;
+        return false;
 
-        return true;
+//        stopRending();
+//        return true;
     }
 
     @Override
