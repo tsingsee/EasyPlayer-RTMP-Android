@@ -478,8 +478,13 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
 
     /* ====================== PlayFragment ====================== */
 
-    public void onEvent(PlayFragment playFragment, int err, String msg) {
-        mBinding.msgTxt.append(String.format("[%s]\t%s\n",new SimpleDateFormat("HH:mm:ss").format(new Date()),msg));
+    /*
+     * state：1、连接中，2、连接错误，3、连接线程退出
+     * */
+    public void onEvent(PlayFragment playFragment, int state, int err, String msg) {
+        mBinding.msgTxt.append(String.format("[%s]\t%s\t\n",
+                new SimpleDateFormat("HH:mm:ss").format(new Date()),
+                msg));
     }
 
     public void onRecordState(int status) {

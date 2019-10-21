@@ -1586,12 +1586,12 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     }
 
     @Override
-    public void onEvent(int channel, int err, int info) {
+    public void onEvent(int channel, int err, int state) {
         ResultReceiver rr = mRR;
         Bundle resultData = new Bundle();
+        resultData.putInt("state", state);
 
-        // info：1 连接中, 2 连接错误, 3 连接线程退出
-        switch(info) {
+        switch (state) {
             case 1:
                 resultData.putString("event-msg", "连接中...");
                 break;
@@ -1604,9 +1604,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                 resultData.putString("event-msg", String.format("线程退出。%d", err));
                 break;
         }
-
-        if (rr != null)
-            rr.send(RESULT_EVENT, resultData);
+        if (rr != null) rr.send(RESULT_EVENT, resultData);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)

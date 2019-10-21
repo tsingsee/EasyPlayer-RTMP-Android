@@ -225,7 +225,9 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 //                    }
 
                     if (activity instanceof PlayActivity) {
-                        ((PlayActivity) activity).onEvent(PlayFragment.this, errorCode, resultData.getString("event-msg"));
+                        int state = resultData.getInt("state");
+                        String msg = resultData.getString("event-msg");
+                        ((PlayActivity) activity).onEvent(PlayFragment.this, state, errorCode, msg);
                     }
                 } else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN) {
                     if (activity instanceof PlayActivity)

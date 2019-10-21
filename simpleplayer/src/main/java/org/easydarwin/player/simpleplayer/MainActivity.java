@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText et = new EditText(this);
         et.setHint("请输入RTMP地址");
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        et.setText(sp.getString("url","rtmp://live.hkstv.hk.lxdns.com/live/hks2"));
+        et.setText(sp.getString("url","rtmp://202.69.69.180:443/webcast/bshdlive-pc"));
 
         new AlertDialog.Builder(this).setView(et).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
