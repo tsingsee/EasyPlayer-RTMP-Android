@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.app.AppCompatActivity;
@@ -74,6 +75,12 @@ public class MediaFilesActivity extends AppCompatActivity {
                 return ssb;
             }
         });
+
+        //取消严格模式  FileProvider
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
     }
 
     @Override
