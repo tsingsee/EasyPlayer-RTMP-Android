@@ -1198,6 +1198,8 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     }
 
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
+        i420callback.onPcmData(pcm);
+
         EasyMuxer2 muxer2 = this.muxer2;
         if (muxer2 == null)
             return;
@@ -1242,6 +1244,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
     public interface I420DataCallback {
         void onI420Data(ByteBuffer buffer);
+        public void onPcmData(byte[] pcm);
     }
 
     /*
