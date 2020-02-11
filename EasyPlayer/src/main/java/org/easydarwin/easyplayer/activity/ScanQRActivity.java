@@ -38,7 +38,7 @@ public class ScanQRActivity extends AppCompatActivity {
                         if (!TextUtils.isEmpty(result.getText())) {
                             final String text = result.getText().trim();
 
-                            if (text.toLowerCase().startsWith("rtmp://")) {
+                            if (text.toLowerCase().startsWith("rtmp://") || text.toLowerCase().startsWith("rtsp://")) {
                                 Intent intent = new Intent();
                                 intent.putExtra("text", text);
                                 setResult(RESULT_OK, intent);

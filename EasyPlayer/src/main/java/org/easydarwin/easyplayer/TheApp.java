@@ -8,7 +8,7 @@ import com.tencent.bugly.beta.Beta;
 
 import org.easydarwin.easyplayer.activity.PlayListActivity;
 import org.easydarwin.easyplayer.data.EasyDBHelper;
-import org.easydarwin.video.Client;
+import org.easydarwin.video.RTMPClient;
 
 public class TheApp extends Application {
 
@@ -20,7 +20,7 @@ public class TheApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        activeDays = Client.getActiveDays(this, BuildConfig.PLAYER_RTMP_KEY);
+        activeDays = RTMPClient.getActiveDays(this, BuildConfig.PLAYER_RTMP_KEY);
         sDB = new EasyDBHelper(this).getWritableDatabase();
 
         Bugly.init(getApplicationContext(), "b12d5b3766", false);

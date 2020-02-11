@@ -1,5 +1,7 @@
 package org.easydarwin.sw;
 
+import java.nio.ByteBuffer;
+
 /**
  *
  */
@@ -52,6 +54,8 @@ public class JNIUtil {
      * @param mode
      */
     public static native void yuvConvert(byte[] data, int width, int height, int mode);
+
+    public static native void yuvConvert2(ByteBuffer buffer, int width, int height, int mode);
 
     /**
      * 0 NULL

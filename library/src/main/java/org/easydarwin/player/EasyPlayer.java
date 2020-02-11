@@ -9,7 +9,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 
-import org.easydarwin.video.EasyPlayerClient;
+import org.easydarwin.video.EasyRTMPPlayerClient;
 
 /**
  * Created by apple on 2017/9/9.
@@ -23,7 +23,7 @@ public class EasyPlayer {
     private final String mKey;
 
     private Surface surface;
-    private EasyPlayerClient mRTSPClient;
+    private EasyRTMPPlayerClient mRTSPClient;
 
     private static class ComponentListener implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 
@@ -83,8 +83,8 @@ public class EasyPlayer {
         public EasyPlayerFactory setUri(Uri uri) {
             String scheme = uri.getScheme();
 
-            if (!"rtsp".equalsIgnoreCase(scheme)){
-                throw new IllegalArgumentException("only support rtsp stream.");
+            if (!"rtmp".equalsIgnoreCase(scheme)){
+                throw new IllegalArgumentException("only support rtmp stream.");
             }
 
             mURI = uri;

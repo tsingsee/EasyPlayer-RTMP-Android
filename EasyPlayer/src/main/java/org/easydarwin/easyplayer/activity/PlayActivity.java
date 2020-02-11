@@ -32,12 +32,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import org.easydarwin.easyplayer.R;
-import org.easydarwin.easyplayer.databinding.ActivityMainBinding;
+import org.easydarwin.easyplayer.data.VideoSource;
+import org.easydarwin.easyplayer.databinding.ActivityPlayBinding;
 import org.easydarwin.easyplayer.fragments.ImageFragment;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.easyplayer.util.FileUtil;
-import org.easydarwin.easyplayer.util.SPUtil;
-import org.easydarwin.video.Client;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -58,12 +57,12 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
     private String url;
 
     private int mTalkPictureSound;
-//    private int mActionStartSound;
+    //    private int mActionStartSound;
 //    private int mActionStopSound;
     private float mAudioVolumn;
 //    private float mMaxVolume;
 
-    private ActivityMainBinding mBinding;
+    private ActivityPlayBinding mBinding;
 
     private long mLastReceivedLength;
 
@@ -109,6 +108,12 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         }
 
         url = getIntent().getStringExtra("play_url");
+        int transportMode = getIntent().getIntExtra(VideoSource.TRANSPORT_MODE, 0);
+        int sendOption = getIntent().getIntExtra(VideoSource.SEND_OPTION, 0);
+        if (TextUtils.isEmpty(url)) {
+            finish();
+            return;
+        }
 
         if (TextUtils.isEmpty(url)) {
             finish();
@@ -126,6 +131,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         super.onReceiveResult(resultCode, resultData);
+
                         if (resultCode == PlayFragment.RESULT_REND_START) {
                             onPlayStart();
                         } else if (resultCode == PlayFragment.RESULT_REND_STOP) {
@@ -137,8 +143,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
                 };
             }
 
-            boolean useUDP = SPUtil.getUDPMode(this);
-            PlayFragment fragment = PlayFragment.newInstance(url, useUDP ? Client.TRANS_TYPE_UDP : Client.TRANS_TYPE_TCP, rr);
+            PlayFragment fragment = PlayFragment.newInstance(url, transportMode, sendOption, rr);
             fragment.setOnDoubleTapListener(this);
 
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment).commit();
@@ -147,7 +152,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
             mRenderFragment = (PlayFragment) getSupportFragmentManager().findFragmentById(R.id.render_holder);
         }
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_play);
 
         initSoundPool();
 
@@ -479,9 +484,9 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
     /* ====================== PlayFragment ====================== */
 
     /*
-     * state：1、连接中，2、连接错误，3、连接线程退出
-     * */
-    public void onEvent(PlayFragment playFragment, int state, int err, String msg) {
+    * state：1、连接中，2、连接错误，3、连接线程退出
+    * */
+    public void onEvent(PlayFragment PlayFragment, int state, int err, String msg) {
         mBinding.msgTxt.append(String.format("[%s]\t%s\t\n",
                 new SimpleDateFormat("HH:mm:ss").format(new Date()),
                 msg));
@@ -593,6 +598,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
 //     */
 //    private void addVideoSource(String url) {
 //        final FrameLayout item = new FrameLayout(PlayActivity.this);
+//        final FrameLayout item = new FrameLayout(PlayActivity.this);
 //        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 //        params.weight = 1;
 //        item.setLayoutParams(params);
@@ -605,7 +611,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
 //
 //        mBinding.playerContainer.addView(item);
 //        boolean useUDP = SPUtil.getUDPMode(this);
-//        getSupportFragmentManager().beginTransaction().add(item.getId(), PlayFragment.newInstance(url, useUDP ? Client.TRANS_TYPE_UDP : Client.TRANS_TYPE_TCP, null)).commit();
+//        getSupportFragmentManager().beginTransaction().add(item.getId(), PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null)).commit();
 //    }
 //
 //    /**

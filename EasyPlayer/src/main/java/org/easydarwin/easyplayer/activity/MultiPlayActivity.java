@@ -22,12 +22,12 @@ import android.widget.ImageButton;
 import android.widget.RadioGroup;
 
 import org.easydarwin.easyplayer.R;
-import org.easydarwin.easyplayer.fragments.PlayFragment;
+import org.easydarwin.easyplayer.fragments.PlayRTMPFragment;
 
 /**
  * 4分屏/9分屏
  * */
-public class MultiPlayActivity extends AppCompatActivity implements PlayFragment.OnDoubleTapListener {
+public class MultiPlayActivity extends AppCompatActivity implements PlayRTMPFragment.OnDoubleTapListener {
 
     public static final String EXTRA_URL = "extra-url";
     public static final int REQUEST_SELECT_ITEM_TO_PLAY = 2001;
@@ -142,12 +142,12 @@ public class MultiPlayActivity extends AppCompatActivity implements PlayFragment
     }
 
     private void addVideoToHolder(String url, int holder) {
-        PlayFragment f = PlayFragment.newInstance(this, url, rr);
+        PlayRTMPFragment f = PlayRTMPFragment.newInstance(this, url, rr);
 
         /**
          * 铺满全屏
          */
-        f.setScaleType(PlayFragment.ASPECT_RATIO_CENTER_CROPS);
+        f.setScaleType(PlayRTMPFragment.ASPECT_RATIO_CENTER_CROPS);
         f.setOnDoubleTapListener(this);
         FragmentManager manager = getSupportFragmentManager();
         manager.beginTransaction().add(holder, f).commit();
@@ -197,7 +197,7 @@ public class MultiPlayActivity extends AppCompatActivity implements PlayFragment
     }
 
     @Override
-    public void onDoubleTab(PlayFragment f) {
+    public void onDoubleTab(PlayRTMPFragment f) {
         GridLayout grid = findViewById(R.id.fragment_container_grid);
 
         for (int i = 0; i < grid.getChildCount(); i++) {
@@ -209,17 +209,17 @@ public class MultiPlayActivity extends AppCompatActivity implements PlayFragment
             } else {
                 if (view.getVisibility() == View.VISIBLE) {
                     view.setVisibility(View.GONE);
-                    f.setScaleType(PlayFragment.FILL_WINDOW);
+                    f.setScaleType(PlayRTMPFragment.FILL_WINDOW);
                 } else {
                     view.setVisibility(View.VISIBLE);
-                    f.setScaleType(PlayFragment.ASPECT_RATIO_CENTER_CROPS);
+                    f.setScaleType(PlayRTMPFragment.ASPECT_RATIO_CENTER_CROPS);
                 }
             }
         }
     }
 
     @Override
-    public void onSingleTab(PlayFragment f) {
+    public void onSingleTab(PlayRTMPFragment f) {
 
     }
 

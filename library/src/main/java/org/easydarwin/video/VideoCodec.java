@@ -80,13 +80,13 @@ public class VideoCodec {
             decoder_close();
         }
 
-        protected int decodeFrame(Client.FrameInfo aFrame, int[] size) {
+        protected int decodeFrame(FrameInfo aFrame, int[] size) {
             int nRet;
-            nRet = decoder_decode( aFrame.buffer, aFrame.offset, aFrame.length, size);
+            nRet = decoder_decode(aFrame.buffer, aFrame.offset, aFrame.length, size);
             return nRet;
         }
 
-        protected ByteBuffer decodeFrameYUV(Client.FrameInfo aFrame, int []size) {
+        protected ByteBuffer decodeFrameYUV(FrameInfo aFrame, int []size) {
             return decoder_decodeYUV( aFrame.buffer, aFrame.offset, aFrame.length, size);
         }
 

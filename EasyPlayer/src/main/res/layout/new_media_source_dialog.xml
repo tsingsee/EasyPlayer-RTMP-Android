@@ -33,4 +33,75 @@
         app:layout_constraintTop_toTopOf="@id/new_media_source_url"
         app:layout_constraintBottom_toBottomOf="@id/new_media_source_url" />
 
+    <TextView
+        android:id="@+id/transport_mode_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="传输协议："
+        android:textColor="#4c4c4c"
+        android:textSize="14sp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/new_media_source_url"/>
+
+    <RadioGroup
+        android:id="@+id/transport_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/transport_mode_name"
+        app:layout_constraintTop_toTopOf="@id/transport_mode_name"
+        app:layout_constraintBottom_toBottomOf="@id/transport_mode_name">
+
+        <RadioButton
+            android:id="@+id/transport_tcp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text=" TCP"
+            android:button="@null"
+            android:drawableLeft="@drawable/bottom_icon_image_selector"
+            android:textColor="@drawable/bottom_icon_text_selector"
+            android:textSize="13sp"/>
+
+        <RadioButton
+            android:id="@+id/transport_udp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text=" UDP"
+            android:button="@null"
+            android:drawableLeft="@drawable/bottom_icon_image_selector"
+            android:textColor="@drawable/bottom_icon_text_selector"
+            android:textSize="13sp"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/send_option_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是否发送保活包："
+        android:textColor="#4c4c4c"
+        android:textSize="14sp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transport_mode"/>
+
+    <CheckBox
+        android:id="@+id/send_option"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:checked="true"
+        android:button="@null"
+        android:drawableLeft="@drawable/bottom_icon_image_selector"
+        app:layout_constraintStart_toEndOf="@id/send_option_name"
+        app:layout_constraintTop_toTopOf="@id/send_option_name"
+        app:layout_constraintBottom_toBottomOf="@id/send_option_name">
+
+    </CheckBox>
+
 </android.support.constraint.ConstraintLayout>

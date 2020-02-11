@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class FileUtil {
 
-    private static String path = Environment.getExternalStorageDirectory() +"/EasyPlayerRTMP";
+    private static String path = Environment.getExternalStorageDirectory() +"/EasyPlayer";
 
     public static String getPicturePath(String url) {
         return path + "/" + urlDir(url) + "/picture";

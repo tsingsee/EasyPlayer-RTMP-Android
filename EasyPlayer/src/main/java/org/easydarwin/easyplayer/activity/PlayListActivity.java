@@ -22,9 +22,12 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,7 +47,6 @@ import org.easydarwin.update.UpdateMgr;
 import java.io.File;
 import java.util.UUID;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static org.easydarwin.update.UpdateMgr.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
 /**
@@ -89,7 +91,17 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
         if (!mCursor.moveToFirst()) {
             ContentValues cv = new ContentValues();
             cv.put(VideoSource.URL, "rtmp://202.69.69.180:443/webcast/bshdlive-pc");
+            cv.put(VideoSource.TRANSPORT_MODE, VideoSource.TRANSPORT_MODE_TCP);
+            cv.put(VideoSource.SEND_OPTION, VideoSource.SEND_OPTION_TRUE);
+
+            ContentValues cv1 = new ContentValues();
+            cv1.put(VideoSource.URL, "rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov");
+            cv1.put(VideoSource.TRANSPORT_MODE, VideoSource.TRANSPORT_MODE_TCP);
+            cv1.put(VideoSource.SEND_OPTION, VideoSource.SEND_OPTION_TRUE);
+
             TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
+            TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv1);
+
             mCursor.close();
             mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
 
@@ -231,17 +243,32 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                     setResult(RESULT_OK, data);
                     finish();
                 } else {
-                    if (BuildConfig.YUV_EXPORT) {
-                        // YUV EXPORT DEMO..
-                        Intent i = new Intent(PlayListActivity.this, YUVExportActivity.class);
-                        i.putExtra("play_url", playUrl);
-                        mPos = pos;
-                        startActivity(i);
+                    if (playUrl.startsWith("rtmp")) {
+                        if (BuildConfig.YUV_EXPORT) {
+                            // YUV EXPORT DEMO..
+                            Intent i = new Intent(PlayListActivity.this, YUVExportRTMPActivity.class);
+                            i.putExtra("play_url", playUrl);
+                            mPos = pos;
+                            startActivity(i);
+                        } else {
+                            Intent i = new Intent(PlayListActivity.this, PlayRTMPActivity.class);
+                            i.putExtra("play_url", playUrl);
+                            mPos = pos;
+                            ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                        }
                     } else {
-                        Intent i = new Intent(PlayListActivity.this, PlayActivity.class);
-                        i.putExtra("play_url", playUrl);
-                        mPos = pos;
-                        ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                        if (BuildConfig.YUV_EXPORT) {
+                            // YUV EXPORT DEMO..
+                            Intent i = new Intent(PlayListActivity.this, YUVExportActivity.class);
+                            i.putExtra("play_url", playUrl);
+                            mPos = pos;
+                            startActivity(i);
+                        } else {
+                            Intent i = new Intent(PlayListActivity.this, PlayActivity.class);
+                            i.putExtra("play_url", playUrl);
+                            mPos = pos;
+                            ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                        }
                     }
                 }
             }
@@ -297,15 +324,34 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void displayDialog(final int pos) {
-        String url = "rtmp://";
+        String url = "rtsp://";
+
+        View view = getLayoutInflater().inflate(R.layout.new_media_source_dialog, null);
+        final CheckBox sendOption = view.findViewById(R.id.send_option);
+        final RadioGroup transportMode = view.findViewById(R.id.transport_mode);
+        final RadioButton transportTcp = view.findViewById(R.id.transport_tcp);
+        edit = view.findViewById(R.id.new_media_source_url);
+
         if (pos > -1) {
             mCursor.moveToPosition(pos);
             url = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
+
+            final int sendOptionValue = mCursor.getInt(mCursor.getColumnIndex(VideoSource.SEND_OPTION));
+            if (sendOptionValue == VideoSource.SEND_OPTION_TRUE) {
+                sendOption.setChecked(true);
+            } else {
+                sendOption.setChecked(false);
+            }
+
+            final int transportModeValue = mCursor.getInt(mCursor.getColumnIndex(VideoSource.TRANSPORT_MODE));
+            if (transportModeValue == VideoSource.TRANSPORT_MODE_UDP) {
+                transportMode.check(R.id.transport_udp);
+            } else {
+                transportMode.check(R.id.transport_tcp);
+            }
         }
 
-        View view = getLayoutInflater().inflate(R.layout.new_media_source_dialog, null);
-        edit = view.findViewById(R.id.new_media_source_url);
-        edit.setHint("RTMP://...");
+        edit.setHint("RTSP://...");
         edit.setText(url);
         edit.setSelection(url.length());
 
@@ -315,8 +361,8 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(View v) {
                 // 动态获取camera和audio权限
-                if (ActivityCompat.checkSelfPermission(PlayListActivity.this, Manifest.permission.CAMERA) != PERMISSION_GRANTED
-                        || ActivityCompat.checkSelfPermission(PlayListActivity.this, Manifest.permission.RECORD_AUDIO) != PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(PlayListActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(PlayListActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(PlayListActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION);
                 } else {
                     toScanQRActivity();
@@ -336,16 +382,25 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                             return;
                         }
 
-                        if (url.toLowerCase().indexOf("rtmp://") != 0) {
-                            Toast.makeText(PlayListActivity.this,"不是合法的RTMP地址，请重新添加.",Toast.LENGTH_SHORT).show();
+                        if (url.toLowerCase().indexOf("rtmp://") != 0 && url.toLowerCase().indexOf("rtsp://") != 0) {
+                            Toast.makeText(PlayListActivity.this,"不是合法地址，请重新添加.",Toast.LENGTH_SHORT).show();
                             return;
                         }
 
                         ContentValues cv = new ContentValues();
                         cv.put(VideoSource.URL, url);
 
+                        if (transportTcp.isChecked()) {
+                            cv.put(VideoSource.TRANSPORT_MODE, VideoSource.TRANSPORT_MODE_TCP);
+                        } else {
+                            cv.put(VideoSource.TRANSPORT_MODE, VideoSource.TRANSPORT_MODE_UDP);
+                        }
+
+                        cv.put(VideoSource.SEND_OPTION, sendOption.isChecked() ? VideoSource.SEND_OPTION_TRUE : VideoSource.SEND_OPTION_FALSE);
+
                         if (pos > -1) {
                             final int _id = mCursor.getInt(mCursor.getColumnIndex(VideoSource._ID));
+
                             TheApp.sDB.update(VideoSource.TABLE_NAME, cv, VideoSource._ID + "=?", new String[]{String.valueOf(_id)});
 
                             mCursor.close();

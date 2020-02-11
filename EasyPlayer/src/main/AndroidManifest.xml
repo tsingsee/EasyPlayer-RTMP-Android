@@ -43,12 +43,20 @@
         </activity>
 
         <activity
+            android:name=".activity.PlayRTMPActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
             android:name=".activity.PlayActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
+        <activity
+            android:name=".activity.YUVExportRTMPActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
 
         <activity
             android:name=".activity.YUVExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
+
 
         <activity
             android:name=".activity.SettingsActivity"

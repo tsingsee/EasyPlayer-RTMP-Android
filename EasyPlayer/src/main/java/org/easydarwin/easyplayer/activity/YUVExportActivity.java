@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import org.easydarwin.easyplayer.R;
-import org.easydarwin.easyplayer.fragments.PlayFragment;
+import org.easydarwin.easyplayer.fragments.PlayRTMPFragment;
 import org.easydarwin.easyplayer.fragments.YUVExportFragment;
 import org.easydarwin.easyplayer.util.SPUtil;
 import org.easydarwin.video.Client;
@@ -31,13 +31,13 @@ public class YUVExportActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.yuv_export_activity);
+        setContentView(R.layout.activity_yuv);
 
         if (savedInstanceState == null) {
             boolean useUDP = SPUtil.getUDPMode(this);
 
-            YUVExportFragment fragment = YUVExportFragment.newInstance(url, useUDP ? Client.TRANS_TYPE_UDP : Client.TRANS_TYPE_TCP, null);
-            fragment.setScaleType(PlayFragment.ASPECT_RATIO_CROPS_MATRIX);
+            YUVExportFragment fragment = YUVExportFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
+            fragment.setScaleType(PlayRTMPFragment.ASPECT_RATIO_CROPS_MATRIX);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"first").commit();
             mRenderFragment = fragment;
         } else {
@@ -56,7 +56,7 @@ public class YUVExportActivity extends AppCompatActivity {
     }
 
     public void onToggleAspectRatio(View view) {
-        YUVExportFragment f =mRenderFragment;
+        YUVExportFragment f = mRenderFragment;
 
         if (f == null)
             return;
@@ -64,31 +64,31 @@ public class YUVExportActivity extends AppCompatActivity {
         f.setScaleType(++i);
 
         switch (i) {
-            case PlayFragment.ASPECT_RATIO_INSIDE: {
+            case PlayRTMPFragment.ASPECT_RATIO_INSIDE: {
                 Toast.makeText(this,"等比例居中",Toast.LENGTH_SHORT).show();
             }
             break;
-            case PlayFragment.ASPECT_RATIO_CENTER_CROPS: {
+            case PlayRTMPFragment.ASPECT_RATIO_CENTER_CROPS: {
                 Toast.makeText(this,"等比例居中裁剪视频",Toast.LENGTH_SHORT).show();
             }
             break;
-            case PlayFragment.FILL_WINDOW:{
+            case PlayRTMPFragment.FILL_WINDOW:{
                 Toast.makeText(this,"拉伸视频,铺满区域",Toast.LENGTH_SHORT).show();
             }
             break;
-            case PlayFragment.ASPECT_RATIO_CROPS_MATRIX:{
+            case PlayRTMPFragment.ASPECT_RATIO_CROPS_MATRIX:{
                 Toast.makeText(this,"等比例显示视频,可拖拽显示隐藏区域.",Toast.LENGTH_SHORT).show();
             }
             break;
         }
 
-        if (i == PlayFragment.FILL_WINDOW) {
+        if (i == PlayRTMPFragment.FILL_WINDOW) {
             i = 0;
         }
     }
 
     public void onToggleDraw(View view) {
-        YUVExportFragment f =mRenderFragment;
+        YUVExportFragment f = mRenderFragment;
         if (f == null) return;
         f.toggleDraw();
     }

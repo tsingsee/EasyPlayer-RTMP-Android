@@ -18,13 +18,13 @@
 # 忽略警告
 -ignorewarning
 
--keepclassmembers class org.easydarwin.video.EasyPlayerClient {
+-keepclassmembers class org.easydarwin.video.EasyRTMPPlayerClient {
    public *;
 }
 
--keepclassmembers class org.easydarwin.video.Client {
-    private void onRTSPSourceCallBack(int, int, int, byte[], byte[]);
+-keepclassmembers class org.easydarwin.video.RTMPClient {
+    private void onSourceCallBack(int, int, int, byte[], byte[]);
 }
--keepclassmembers class org.easydarwin.video.Client$FrameInfo{
+-keepclassmembers class org.easydarwin.video.RTMPClient$FrameInfo{
     *;
 }

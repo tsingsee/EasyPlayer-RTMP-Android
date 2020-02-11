@@ -72,10 +72,10 @@
 # -keep public class mypackage.MyClass
 # -keep public interface mypackage.MyInterface
 # -keep public class * implements mypackage.MyInterface
--keepclassmembers class org.easydarwin.video.EasyPlayerClient {
+-keepclassmembers class org.easydarwin.video.EasyRTMPPlayerClient {
    public *;
 }
 
--keepclassmembers class org.easydarwin.video.Client {
-    private static void onRTSPSourceCallBack(int,int,int,byte[],byte[]);
+-keepclassmembers class org.easydarwin.video.RTMPClient {
+    private static void onSourceCallBack(int,int,int,byte[],byte[]);
 }

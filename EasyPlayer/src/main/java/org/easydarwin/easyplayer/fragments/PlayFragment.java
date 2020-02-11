@@ -1,7 +1,6 @@
 package org.easydarwin.easyplayer.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -38,12 +37,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.BuildConfig;
-import org.easydarwin.easyplayer.activity.PlayActivity;
 import org.easydarwin.easyplayer.R;
+import org.easydarwin.easyplayer.activity.PlayActivity;
 import org.easydarwin.easyplayer.util.FileUtil;
 import org.easydarwin.easyplayer.util.SPUtil;
 import org.easydarwin.easyplayer.views.AngleView;
 import org.easydarwin.video.Client;
+import org.easydarwin.video.EasyRTMPPlayerClient;
 import org.easydarwin.video.EasyPlayerClient;
 
 import java.io.File;
@@ -60,10 +60,11 @@ import uk.copywitchshame.senab.photoview.gestures.PhotoViewAttacher;
 public class PlayFragment extends Fragment implements TextureView.SurfaceTextureListener, PhotoViewAttacher.OnMatrixChangedListener {
     protected static final String TAG = "PlayFragment";
 
-    public static final String KEY = BuildConfig.PLAYER_RTMP_KEY;
+    public static final String KEY = BuildConfig.PLAYER_RTSP_KEY;
 
     public static final String ARG_PARAM1 = "param1";
-    public static final String ARG_PARAM2 = "param2";
+    public static final String ARG_TRANSPORT_MODE = "ARG_TRANSPORT_MODE";
+    public static final String ARG_SEND_OPTION = "ARG_SEND_OPTION";
     public static final String ARG_PARAM3 = "param3";
 
     public static final int RESULT_REND_START = 1;
@@ -82,9 +83,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private int mRatioType = ASPECT_RATIO_INSIDE;
 
     protected String mUrl;
-    protected int mType;        // 0或1表示TCP，2表示UDP
+    protected int mType;// 0或1表示TCP，2表示UDP
+    protected int sendOption;
 
-    private ResultReceiver mRR; // ResultReceiver是一个用来接收其他进程回调结果的通用接口
+    private ResultReceiver mRR;// ResultReceiver是一个用来接收其他进程回调结果的通用接口
 
     protected EasyPlayerClient mStreamRender;
     protected ResultReceiver mResultReceiver;
@@ -122,30 +124,14 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }
     };
 
-    public static PlayFragment newInstance(String url, int type, ResultReceiver rr) {
+    public static PlayFragment newInstance(String url, int transportMode, int sendOption, ResultReceiver rr) {
+        PlayFragment fragment = new PlayFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, url);
-        args.putInt(ARG_PARAM2, type);
+        args.putInt(ARG_TRANSPORT_MODE, transportMode);
+        args.putInt(ARG_SEND_OPTION, sendOption);
         args.putParcelable(ARG_PARAM3, rr);
-
-        PlayFragment fragment = new PlayFragment();
         fragment.setArguments(args);
-
-        return fragment;
-    }
-
-    public static PlayFragment newInstance(Context context, String url, ResultReceiver rr) {
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, url);
-
-        boolean useUDP = SPUtil.getUDPMode(context);
-
-        args.putInt(ARG_PARAM2, useUDP ? Client.TRANS_TYPE_UDP : Client.TRANS_TYPE_TCP);
-        args.putParcelable(ARG_PARAM3, rr);
-
-        PlayFragment fragment = new PlayFragment();
-        fragment.setArguments(args);
-
         return fragment;
     }
 
@@ -157,7 +143,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
         if (getArguments() != null) {
             mUrl = getArguments().getString(ARG_PARAM1);
-            mType = getArguments().getInt(ARG_PARAM2);
+            mType = getArguments().getInt(ARG_TRANSPORT_MODE);
+            sendOption = getArguments().getInt(ARG_SEND_OPTION);
             mRR = getArguments().getParcelable(ARG_PARAM3);
         }
     }
@@ -200,25 +187,25 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                 if (activity == null)
                     return;
 
-                if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
+                if (resultCode == EasyRTMPPlayerClient.RESULT_VIDEO_DISPLAYED) {
                     if (resultData != null) {
-                        int videoDecodeType = resultData.getInt(EasyPlayerClient.KEY_VIDEO_DECODE_TYPE, 0);
+                        int videoDecodeType = resultData.getInt(EasyRTMPPlayerClient.KEY_VIDEO_DECODE_TYPE, 0);
                         Log.i(TAG, "视频解码方式:" + (videoDecodeType == 0 ? "软解码" : "硬解码"));
                     }
 
                     onVideoDisplayed();
-                } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
-                    mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);
-                    mHeight = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_HEIGHT);
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_VIDEO_SIZE) {
+                    mWidth = resultData.getInt(EasyRTMPPlayerClient.EXTRA_VIDEO_WIDTH);
+                    mHeight = resultData.getInt(EasyRTMPPlayerClient.EXTRA_VIDEO_HEIGHT);
 
                     onVideoSizeChange();
-                } else if (resultCode == EasyPlayerClient.RESULT_TIMEOUT) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_TIMEOUT) {
                     new AlertDialog.Builder(getActivity()).setMessage("试播时间到").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_AUDIO) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_UNSUPPORTED_AUDIO) {
                     new AlertDialog.Builder(getActivity()).setMessage("音频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_VIDEO) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_UNSUPPORTED_VIDEO) {
                     new AlertDialog.Builder(getActivity()).setMessage("视频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyPlayerClient.RESULT_EVENT) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_EVENT) {
                     int errorCode = resultData.getInt("errorcode");
 //                    if (errorCode != 0) {
 //                        stopRending();
@@ -229,10 +216,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                         String msg = resultData.getString("event-msg");
                         ((PlayActivity) activity).onEvent(PlayFragment.this, state, errorCode, msg);
                     }
-                } else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_RECORD_BEGIN) {
                     if (activity instanceof PlayActivity)
                         ((PlayActivity)activity).onRecordState(1);
-                } else if (resultCode == EasyPlayerClient.RESULT_RECORD_END) {
+                } else if (resultCode == EasyRTMPPlayerClient.RESULT_RECORD_END) {
                     if (activity instanceof PlayActivity)
                         ((PlayActivity)activity).onRecordState(-1);
                 }
@@ -328,7 +315,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private void onVideoDisplayed() {
         View view = getView();
         Log.i(TAG, String.format("VIDEO DISPLAYED!!!!%d*%d", mWidth, mHeight));
-//         Toast.makeText(PlayActivity.this, "视频正在播放了", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(PlayActivity.this, "视频正在播放了", Toast.LENGTH_SHORT).show();
         view.findViewById(android.R.id.progress).setVisibility(View.GONE);
 
         mSurfaceView.post(new Runnable() {
@@ -373,9 +360,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
         boolean autoRecord = SPUtil.getAutoRecord(getContext());
 
+        File f = new File(FileUtil.getMoviePath(mUrl));
+        f.mkdirs();
+
         try {
             mStreamRender.start(mUrl,
-                    mType,
+                    mType < 2 ? Client.TRANSTYPE_TCP : Client.TRANSTYPE_UDP,
+                    sendOption,
                     Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,
                     "",
                     "",
