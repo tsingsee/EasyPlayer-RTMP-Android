@@ -29,17 +29,17 @@ Android：Android Studio编译；
 
 ## 最新版本下载 ##
 
-- Android RTMP专用版：[https://fir.im/EasyRTMPlayer](https://fir.im/EasyRTMPlayer)
+- Android RTMP专用版：[http://d.alphaqr.com/EasyRTMPlayer](http://d.alphaqr.com/EasyRTMPlayer)
 
 ![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/easyplayer/firimeasyrtmplayerandroid201801.png)
 
 
-- Android RTSP专用版：[https://fir.im/EasyRTSPlayer](https://fir.im/EasyRTSPlayer)
+- Android RTSP专用版：[http://d.alphaqr.com/EasyRTSPlayer](http://d.alphaqr.com/EasyRTSPlayer)
 
 ![EasyPlayer-RTSP Android](http://www.easydarwin.org/github/images/easyplayer/firimeasyrtsplayerandroid201801.png)
 
 
-- Android Pro全功能版：[http://fir.im/EasyPlayerPro](http://fir.im/EasyPlayerPro)
+- Android Pro全功能版：[http://d.alphaqr.com/EasyPlayerPro](http://d.alphaqr.com/EasyPlayerPro)
 
 ![EasyPlayer Pro 版](http://www.easydarwin.org/github/images/easyplayerprofirim20170205.png)
 
