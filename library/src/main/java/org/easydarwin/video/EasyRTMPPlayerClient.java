@@ -113,6 +113,7 @@ public class EasyRTMPPlayerClient implements RTMPClient.SourceCallBack {
     private RTMPClient.MediaInfo mMediaInfo;
     private short mHeight = 0;
     short mWidth = 0;
+    private boolean audioRequestCode = true;
 
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
@@ -1001,8 +1002,10 @@ public class EasyRTMPPlayerClient implements RTMPClient.SourceCallBack {
                     // 请求音频的焦点
                     int requestCode = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
                     if (requestCode != AUDIOFOCUS_REQUEST_GRANTED) {
+                        audioRequestCode = false;
                         return;
                     }
+                    audioRequestCode = true;
 
                     do {
                         // 取出音频帧，如果已经获取到mMediaInfo，则只取出一帧
@@ -1412,7 +1415,9 @@ public class EasyRTMPPlayerClient implements RTMPClient.SourceCallBack {
             Log.d(TAG, String.format("queue size :%d", mQueue.size()));
 
             try {
-                mQueue.put(frameInfo);
+                if (audioRequestCode) {
+                    mQueue.put(frameInfo);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -132,6 +132,8 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     private Client.MediaInfo mMediaInfo;
     private short mHeight = 0;
     short mWidth = 0;
+    private boolean audioRequestCode = true;
+
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
     private final I420DataCallback i420callback;
@@ -563,8 +565,11 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     try {
                         int requestCode = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
                         if (requestCode != AUDIOFOCUS_REQUEST_GRANTED) {
+                            audioRequestCode = false;
                             return;
                         }
+                        audioRequestCode = true;
+
                         do {
                             frameInfo = mQueue.takeAudioFrame();
                             if (mMediaInfo != null) break;
@@ -1509,7 +1514,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             }
 //            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
             try {
-                mQueue.put(frameInfo);
+                if (audioRequestCode) {
+                    mQueue.put(frameInfo);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
