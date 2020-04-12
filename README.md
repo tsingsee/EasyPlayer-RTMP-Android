@@ -31,17 +31,17 @@ Android：Android Studio编译；
 
 - Android RTMP专用版：[http://d.alphaqr.com/EasyRTMPlayer](http://d.alphaqr.com/EasyRTMPlayer)
 
-![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/easyplayer/firimeasyrtmplayerandroid201801.png)
+![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/app/2020/easy_player_rtmp_android.png)
 
 
 - Android RTSP专用版：[http://d.alphaqr.com/EasyRTSPlayer](http://d.alphaqr.com/EasyRTSPlayer)
 
-![EasyPlayer-RTSP Android](http://www.easydarwin.org/github/images/easyplayer/firimeasyrtsplayerandroid201801.png)
+![EasyPlayer-RTSP Android](http://www.easydarwin.org/github/images/app/2020/easy_player_rtsp_android.png)
 
 
 - Android Pro全功能版：[http://d.alphaqr.com/EasyPlayerPro](http://d.alphaqr.com/EasyPlayerPro)
 
-![EasyPlayer Pro 版](http://www.easydarwin.org/github/images/easyplayerprofirim20170205.png)
+![EasyPlayer Pro 版](http://www.easydarwin.org/github/images/app/2020/easy_player_pro_android.png)
 
 
 ## DEMO效果 ##
