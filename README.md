@@ -29,17 +29,17 @@ Android：Android Studio编译；
 
 ## 最新版本下载 ##
 
-- Android RTMP专用版：[http://d.alphaqr.com/EasyRTMPlayer](http://d.alphaqr.com/EasyRTMPlayer)
+- Android RTMP专用版：[http://app.tsingsee.com/EasyRTMPlayer](http://app.tsingsee.com/EasyRTMPlayer)
 
 ![EasyPlayer-RTMP Android](http://www.easydarwin.org/github/images/app/2020/easy_player_rtmp_android.png)
 
 
-- Android RTSP专用版：[http://d.alphaqr.com/EasyRTSPlayer](http://d.alphaqr.com/EasyRTSPlayer)
+- Android RTSP专用版：[http://app.tsingsee.com/EasyRTSPlayer](http://app.tsingsee.com/EasyRTSPlayer)
 
 ![EasyPlayer-RTSP Android](http://www.easydarwin.org/github/images/app/2020/easy_player_rtsp_android.png)
 
 
-- Android Pro全功能版：[http://d.alphaqr.com/EasyPlayerPro](http://d.alphaqr.com/EasyPlayerPro)
+- Android Pro全功能版：[http://app.tsingsee.com/EasyPlayerPro](http://app.tsingsee.com/EasyPlayerPro)
 
 ![EasyPlayer Pro 版](http://www.easydarwin.org/github/images/app/2020/easy_player_pro_android.png)
 
@@ -85,7 +85,7 @@ Android：Android Studio编译；
 
 ## 技术支持 ##
 
-- 邮件：[support@easydarwin.org](mailto:support@easydarwin.org) 
+- 邮件：[support@tsingsee.com](mailto:support@tsingsee.com) 
 
 - QQ交流群：**544917793**
 
@@ -94,12 +94,9 @@ Android：Android Studio编译；
 
 ## 获取更多信息 ##
 
-**EasyDarwin**开源流媒体服务器：[www.EasyDarwin.org](http://www.easydarwin.org)
-
 **EasyDSS**商用流媒体解决方案：[www.EasyDSS.com](http://www.easydss.com)
 
 **EasyNVR**无插件直播方案：[www.EasyNVR.com](http://www.easynvr.com)
 
-Copyright &copy; EasyDarwin Team 2012-2019
+Copyright &copy; TSINGSEE Team 2012-2019
 
-![EasyDarwin](http://www.easydarwin.org/skin/easydarwin/images/wx_qrcode.jpg)
