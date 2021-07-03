@@ -8,11 +8,11 @@ android {
         applicationId "org.easydarwin.easyplayer.rtmp"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 14201211
-        versionName "1.4.20.1211"
+        versionCode 14210703
+        versionName "1.4.21.0703"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField 'boolean', 'YUV_EXPORT', 'false'
-        buildConfigField 'String', 'PLAYER_RTMP_KEY', "\"59615A67427036526D343041445756676E35727970654676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A3062584337567778576F502B6C2F69426C59584E35\""
+        buildConfigField 'String', 'PLAYER_RTMP_KEY', "\"59615A67427036526D343241654C56676E3071484A654676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A3062584253567778576F502B6C2F69426C59584E35\""
 
         ndk {
             //设置支持的SO库架构
